@@ -11,15 +11,16 @@
 <body>
 
 <table>
-      <tr>
-        <td></td>
-        <td>Shopping List</td>
-        <td></td>
-        <td></td>
-        <td><button onclick="showPopUpById('addItem')">✚</button></td>
-      </tr>
+    <tr>
+      <td colspan="4" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
+      <td><button onclick="showPopUpById('addItem')">✚</button></td>
+    </tr>
+    {{$lastCat := ""}}
     {{range $i,$e := .Items }}
       {{if gt $e.QuantityRequired 0.0}}
+      {{if not (eq $e.Category $lastCat) }}
+      <tr><td colspan="5" style="font-weight:bold;">{{$e.Category}}</td></tr>
+      {{end}}
       <tr>
         <td><a href="/?del={{$i}}"><button title="Entfernen">✗</button></a></td>
         <td>{{$e.Name}}</td>
@@ -27,6 +28,7 @@
         <td>{{$e.Unit}}</td>
         <td><a href="/?shopped={{$i}}"><button title="Gekauft">✔</button></a></td>
       </tr>
+      {{$lastCat = $e.Category}}
       {{end}}
     {{end}}
 </table>
@@ -135,9 +137,7 @@
 </form>
 </div>
 
+<p><a href="/listAll">Alle Einträge</a></p>
 
-<p>
-<a href="/listAll">Alle Einträge</a>
-</p>
 </body>
 </html>

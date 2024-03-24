@@ -81,6 +81,8 @@ func (s *DataManager) RestoreData(user string, pass string) (*item.Items, error)
 		return nil, errors.New("wrong password")
 	}
 
+	log.Println("Load data for", user)
+
 	file := filepath.Join(s.folder, user, "data.json")
 	if _, err := os.Stat(file); err != nil {
 		if os.IsNotExist(err) {
@@ -102,6 +104,7 @@ func (s *DataManager) RestoreData(user string, pass string) (*item.Items, error)
 }
 
 func (s *DataManager) PersistData(user string, items *item.Items) {
+	log.Println("Persisting data for", user)
 	file := filepath.Join(s.folder, user, "data.json")
 	items.Save(file)
 }
