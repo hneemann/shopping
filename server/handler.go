@@ -23,7 +23,7 @@ var addTemp = Templates.Lookup("add.html")
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
-
+		categorySelected := item.Categories[0]
 		if r.Method == http.MethodPost {
 			submit := r.FormValue("submit")
 			if submit == "Hinzufügen" {
@@ -34,6 +34,7 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 					for _, e := range *data {
 						if e.Name == itemName {
 							e.SetRequired(e.QuantityRequired + quantity)
+							categorySelected = e.Category
 							found = true
 							break
 						}
@@ -56,7 +57,9 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 				quantity := toFloat(r.FormValue("quantity"))
 				id, err := strconv.Atoi(r.FormValue("id"))
 				if err == nil && id >= 0 && id < len(*data) {
-					(*data)[id].SetRequired(quantity)
+					it := (*data)[id]
+					it.SetRequired(quantity)
+					categorySelected = it.Category
 				}
 			}
 		} else {
@@ -76,11 +79,13 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		d := struct {
-			Items      *item.Items
-			Categories item.CategoryList
+			Items            *item.Items
+			Categories       item.CategoryList
+			CategorySelected item.Category
 		}{
-			Items:      data,
-			Categories: item.Categories,
+			Items:            data,
+			Categories:       item.Categories,
+			CategorySelected: categorySelected,
 		}
 
 		err := mainTemp.Execute(w, d)

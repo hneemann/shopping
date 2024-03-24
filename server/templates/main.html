@@ -3,27 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Liste</title>
+  <link rel="icon" type="image/svg" href="/assets/icon.svg">
   <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
   <script type="text/javascript" src="/assets/main.js"></script>
-  <script>
-    function showSetQuantity(name,quantity,id) {
-      document.getElementById('setQuantityName').innerHTML = name;
-      document.getElementById('setQuantitySelect').value = quantity;
-      document.getElementById('setQuantityId').value = id;
-      showPopUpById('setQuantity');
-    }
-    function catChanged() {
-      var category = document.getElementById('category').value;
-      var items = document.getElementById('items').getElementsByTagName('option');
-      let found = [];
-      for (var i = 0; i < items.length; i++) {
-        if (items[i].id == category) {
-          found.push(items[i].value)
-        }
-      }
-      document.getElementById('selectItem').innerHTML = found.map(e => '<option value="' + e + '">' + e + '</option>').join('');
-    }
-  </script>
+  <script type="text/javascript" src="/assets/select.js"></script>
 </head>
 <body>
 
@@ -57,7 +40,8 @@
       <td><label for="item">Kategorie:</label></td>
       <td>
       <select class="value" id="category" onchange="catChanged()">
-        {{range $i,$e := .Categories }}<option value="{{$e}}">{{$e}}</option>{{end}}
+        {{$cs := .CategorySelected}}
+        {{range $i,$e := .Categories }}<option value="{{$e}}"{{if eq $e $cs}} selected="selected"{{end}}>{{$e}}</option>{{end}}
       </select>
       </td>
     </tr>
@@ -65,8 +49,8 @@
       <td><label for="item">Was:</label></td>
       <td>
       <select class="value" name="item" id="selectItem">
-        {{$first := .Categories.First}}
-        {{range $i,$e := .Items }}{{if eq $e.Category $first }}<option value="{{$e.Name}}">{{$e.Name}}</option>{{end}}{{end}}
+        {{$cs := .CategorySelected}}
+        {{range $i,$e := .Items }}{{if eq $e.Category $cs }}<option value="{{$e.Name}}">{{$e.Name}}</option>{{end}}{{end}}
       </select>
       </td>
     </tr>
@@ -98,12 +82,13 @@
     </tr>
     <tr>
       <td></td>
-      <td><button type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Hinzufügen"></td>
+      <td><button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Hinzufügen"></td>
     </tr>
   </table>
   <datalist id="items">
     {{range $i,$e := .Items }}<option id="{{$e.Category}}" value="{{$e.Name}}">{{$e.Name}}</option>{{end}}
   </datalist>
+  <input id="categorySelected" type="hidden" name="categorySelected" value="">
 </form>
 <a href="/add">Neu</a>
 </div>
@@ -143,7 +128,7 @@
     </tr>
     <tr>
       <td></td>
-      <td><button type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Ändern"></td>
+      <td><button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Ändern"></td>
     </tr>
   </table>
   <input id="setQuantityId" type="hidden" name="id" value="">

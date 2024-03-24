@@ -9,6 +9,11 @@ button, input, select {
     font-family: Arial, sans-serif;
     font-size:inherit
 }
+
+button.dialog {
+    margin-right: 1em;
+}
+
 input.value, select.value {
     width: 13em;
 }
@@ -23,7 +28,7 @@ div.addItem {
     background-color: white;
     padding: 1em;
     visibility: hidden;
-    position: absolute;
+    position: fixed;
     top: 20%;
     left: 50%;
     width: 20em;
