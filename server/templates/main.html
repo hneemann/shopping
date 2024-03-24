@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste</title>
+  <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
+  <script type="text/javascript" src="/assets/main.js"></script>
+</head>
+<body>
+
+<table>
+      <tr>
+        <td></td>
+        <td>Shopping List</td>
+        <td></td>
+        <td></td>
+        <td><button onclick="showPopUpById('addItem')">✚</button></td>
+      </tr>
+    {{range $i,$e := . }}
+      {{if gt $e.QuantityRequired 0.0}}
+      <tr>
+        <td><a href="/?del={{$i}}"><button title="Entfernen">✗</button></a></td>
+        <td>{{$e.Name}}</td>
+        <td>{{$e.QuantityRequired}}</td>
+        <td>{{$e.Unit}}</td>
+        <td><a href="/?shopped={{$i}}"><button title="Gekauft">✔</button></a></td>
+      </tr>
+      {{end}}
+    {{end}}
+</table>
+
+<div id="addItem" class="addItem">
+<form action="/" method="post">
+  <table>
+    <tr>
+      <td><label for="item">Was:</label></td>
+      <td><input class="value" list="items" name="item" id="item" ></td>
+    </tr>
+    <tr>
+      <td><label for="quantity">Wieviel:</label></td>
+      <td><input class="value" type="number" name="quantity" id="quantity" min="1" value="1"></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><button type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Hinzufügen"></td>
+    </tr>
+  </table>
+  <datalist id="items">
+    {{range $i,$e := . }}{{if le $e.QuantityRequired 0.1}}<option value="{{$e.Name}}">{{end}}{{end}}
+  </datalist>
+</form>
+</div>
+
+<p>
+<a href="/listAll">Alle Einträge</a>
+</p>
+</body>
+</html>

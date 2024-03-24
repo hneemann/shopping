@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste</title>
+  <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
+  <script type="text/javascript" src="/assets/main.js"></script>
+</head>
+<body>
+
+<p>Neues Lebensmittel</p>
+
+<form action="/add" method="post">
+  <table>
+     <tr>
+       <td><label for="name">Name:</label></td>
+       <td><input class="value" type="text" id="name" name="name" placeholder="Name" value="{{.Name}}"/></td>
+     </tr>
+     <tr>
+       <td><label for="unit">Einheit:</label></td>
+       <td><input class="value" type="text" id="unit" name="unit" placeholder="Einheit z.B. 'Dose'"/></td>
+     </tr>
+     <tr>
+       <td><label for="category">Kategorie:</label></td>
+       <td>
+         <select id="category" name="category">
+           {{range .Categories}}
+           <option value="{{.}}">{{.}}</option>
+           {{end}}
+         </select>
+       </td>
+     </tr>
+     <tr>
+       <td><label for="weight">Gewicht:</label></td>
+       <td><input class="value" type="number" id="weight" name="weight" placeholder="Gewicht in g"/></td>
+     </tr>
+     <tr>
+       <td><label for="volume">Volumen:</label></td>
+       <td><input class="value" type="number" id="volume" name="volume" placeholder="Volumen in ml"/></td>
+     </tr>
+  </table>
+  <a href="/"><button type="button">Abbrechen</button></a>
+  <input type="submit" value="Hinzufügen">
+  <input type="hidden" name="quantity" value="{{.Quantity}}"/>
+
+    <datalist id="units">
+        <option value="Stück">
+        <option value="Liter">
+        <option value="Paket">
+        <option value="Glas">
+        <option value="Dose">
+        <option value="Tüte">
+    </datalist>
+
+</form>
+
+</body>
+</html>

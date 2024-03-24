@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
+  <script type="text/javascript" src="/assets/main.js"></script>
+</head>
+<body>
+  <h3>Registrierung Einkaufsliste</h3>
+<form action="/register" method="post">
+  <table>
+    <tr>
+      <td><label for="username">Username</label></td>
+      <td><input type="text" name="username" id="username" placeholder="Username"></td>
+    </tr>
+    <tr>
+      <td><label for="password">Password</label></td>
+      <td><input type="password" name="password" id="password" placeholder="Password"></td>
+    </tr>
+    <tr>
+      <td><label for="password2">Wiederholung</label></td>
+      <td><input type="password" name="password2" id="password2" placeholder="repeat Password"></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" value="Registrieren"></td>
+    </tr>
+  </table>
+</form>
+    {{if .}}
+      <p>{{.}}</p>
+    {{end}}
+
+    <p><a href="/login">Login</a></p>
+</body>
+</html>

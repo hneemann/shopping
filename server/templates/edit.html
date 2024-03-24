@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste</title>
+  <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
+  <script type="text/javascript" src="/assets/main.js"></script>
+</head>
+<body>
+
+<p>Lebensmittel</p>
+
+<form action="/edit/" method="post">
+  <table>
+     <tr>
+       <td><label for="name">Name:</label></td>
+       <td><input class="value" type="text" id="name" name="name" placeholder="Name" value="{{.Item.Name}}"/></td>
+     </tr>
+     <tr>
+       <td><label for="unit">Einheit:</label></td>
+       <td><input class="value" lost="units" id="unit" name="unit" placeholder="Einheit z.B. 'Dose'" value="{{.Item.Unit}}"/></td>
+     </tr>
+     <tr>
+       <td><label for="category">Kategorie:</label></td>
+       <td>
+         {{ $cat := .Item.Category }}
+         <select id="category" name="category">
+           {{range .Categories}}
+           <option value="{{.}}"{{if eq . $cat}} selected="selected"{{end}}>{{.}}</option>
+           {{end}}
+         </select>
+       </td>
+     </tr>
+     <tr>
+       <td><label for="weight">Gewicht:</label></td>
+       <td><input class="value" type="number" id="weight" name="weight" placeholder="Gewicht in g" value="{{.Item.Weight}}"/></td>
+     </tr>
+     <tr>
+       <td><label for="volume">Volumen:</label></td>
+       <td><input class="value" type="number" id="volume" name="volume" placeholder="Volumen in ml" value="{{.Item.Volume}}"/></td>
+     </tr>
+  </table>
+  <a href="/listAll"><button type="button">Abbrechen</button></a>
+  <input type="submit" value="Ändern"/>
+  <input type="hidden" name="id" value="{{.Id}}"/>
+</form>
+
+</body>
+</html>

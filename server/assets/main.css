@@ -1,0 +1,28 @@
+td {
+    padding: 0.3em;
+}
+body {
+    font-family: Arial, sans-serif;
+    font-size: 200%;
+}
+button, input, select {
+    font-family: Arial, sans-serif;
+    font-size:inherit
+}
+input.value {
+    width: 13em;
+}
+
+div.addItem {
+    border-style: solid;
+    border-color: darkgray;
+    background-color: white;
+    padding: 1em;
+    visibility: hidden;
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    width: 20em;
+    margin-left: -10em;
+    z-index: 5;
+}

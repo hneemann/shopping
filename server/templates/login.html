@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
+  <script type="text/javascript" src="/assets/main.js"></script>
+</head>
+<body>
+  <h3>Login Einkaufsliste</h3>
+  <form action="/login" method="post">
+    <table>
+    <tr>
+      <td><label for="username">Username</label></td>
+      <td><input type="text" name="username" id="username" placeholder="Username"><td>
+    </tr>
+    <tr>
+      <td><label for="password">Password</label></td>
+      <td><input type="password" name="password" id="password" placeholder="Password"></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" value="Login"></td>
+    </tr>
+    </table>
+  </form>
+  {{if .}}
+    <p>{{.}}</p>
+  {{end}}
+  <p><a href="/register">Register</a></p>
+</body>
+</html>

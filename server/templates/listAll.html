@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste</title>
+  <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
+  <script type="text/javascript" src="/assets/main.js"></script>
+</head>
+<body>
+
+<table>
+      <tr>
+        <td>Alle Einträge</td>
+      </tr>
+    {{range $i,$e := . }}
+      <tr>
+        <td>{{$e.Name}}</td>
+        <td>{{$e.Unit}}</td>
+        <td>{{$e.Category}}</td>
+        <td>{{$e.Weight}}</td>
+        <td>{{$e.Volume}}</td>
+        <td><a href="/edit/?item={{$i}}"><button>✍︎</button></a></td>
+      </tr>
+    {{end}}
+</table>
+
+<a href="/">Liste</a>
+</body>
+</html>
