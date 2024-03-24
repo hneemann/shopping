@@ -40,20 +40,23 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 				if !found {
-					var data = struct {
-						Name       string
-						Quantity   float64
-						Categories []item.Category
-					}{
+					err := addTemp.Execute(w, addData{
 						Name:       itemName,
 						Quantity:   quantity,
+						QHidden:    true,
 						Categories: item.Categories,
-					}
-					err := addTemp.Execute(w, data)
+					})
 					if err != nil {
 						log.Println(err)
 					}
 					return
+				}
+			}
+			if submit == "Ändern" {
+				quantity := toFloat(r.FormValue("quantity"))
+				id, err := strconv.Atoi(r.FormValue("id"))
+				if err == nil && id >= 0 && id < len(*data) {
+					(*data)[id].SetRequired(quantity)
 				}
 			}
 		} else {
@@ -72,7 +75,15 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		err := mainTemp.Execute(w, data)
+		d := struct {
+			Items      *item.Items
+			Categories item.CategoryList
+		}{
+			Items:      data,
+			Categories: item.Categories,
+		}
+
+		err := mainTemp.Execute(w, d)
 		if err != nil {
 			log.Println(err)
 		}
@@ -91,6 +102,25 @@ func toFloat(str string) float64 {
 	return f
 }
 
+func toInt(str string) int {
+	str = strings.TrimSpace(str)
+	if len(str) == 0 {
+		return 0
+	}
+	f, err := strconv.Atoi(str)
+	if err != nil {
+		return 0
+	}
+	return f
+}
+
+type addData struct {
+	Name       string
+	Quantity   float64
+	QHidden    bool
+	Categories []item.Category
+}
+
 func AddHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
 		if r.Method == http.MethodPost {
@@ -98,14 +128,14 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 			itemUnit := r.FormValue("unit")
 			category := r.FormValue("category")
 			quantity := toFloat(r.FormValue("quantity"))
-			weight := toFloat(r.FormValue("weight"))
-			volume := toFloat(r.FormValue("volume"))
+			weight := toInt(r.FormValue("weight"))
+			volume := toInt(r.FormValue("volume"))
 
 			if len(itemName) > 0 {
 				found := false
 				for _, e := range *data {
 					if e.Name == itemName {
-						e.SetRequired(e.QuantityRequired + quantity)
+						e.SetRequired(quantity)
 						found = true
 						break
 					}
@@ -117,6 +147,17 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 					(*data).Order(item.REWE)
 				}
 			}
+		} else {
+			err := addTemp.Execute(w, addData{
+				Name:       "",
+				Quantity:   1,
+				QHidden:    false,
+				Categories: item.Categories,
+			})
+			if err != nil {
+				log.Println(err)
+			}
+			return
 		}
 	}
 	http.Redirect(w, r, "/", http.StatusFound)
@@ -141,8 +182,8 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			itemName := r.FormValue("name")
 			itemUnit := r.FormValue("unit")
 			category := r.FormValue("category")
-			weight := toFloat(r.FormValue("weight"))
-			volume := toFloat(r.FormValue("volume"))
+			weight := toInt(r.FormValue("weight"))
+			volume := toInt(r.FormValue("volume"))
 			idStr := r.FormValue("id")
 
 			id, err := strconv.Atoi(idStr)

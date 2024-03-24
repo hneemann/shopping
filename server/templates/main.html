@@ -5,6 +5,25 @@
   <title>Liste</title>
   <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
   <script type="text/javascript" src="/assets/main.js"></script>
+  <script>
+    function showSetQuantity(name,quantity,id) {
+      document.getElementById('setQuantityName').innerHTML = name;
+      document.getElementById('setQuantitySelect').value = quantity;
+      document.getElementById('setQuantityId').value = id;
+      showPopUpById('setQuantity');
+    }
+    function catChanged() {
+      var category = document.getElementById('category').value;
+      var items = document.getElementById('items').getElementsByTagName('option');
+      let found = [];
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].id == category) {
+          found.push(items[i].value)
+        }
+      }
+      document.getElementById('selectItem').innerHTML = found.map(e => '<option value="' + e + '">' + e + '</option>').join('');
+    }
+  </script>
 </head>
 <body>
 
@@ -16,29 +35,66 @@
         <td></td>
         <td><button onclick="showPopUpById('addItem')">✚</button></td>
       </tr>
-    {{range $i,$e := . }}
+    {{range $i,$e := .Items }}
       {{if gt $e.QuantityRequired 0.0}}
       <tr>
         <td><a href="/?del={{$i}}"><button title="Entfernen">✗</button></a></td>
         <td>{{$e.Name}}</td>
-        <td>{{$e.QuantityRequired}}</td>
+        <td class="number" onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
         <td>{{$e.Unit}}</td>
         <td><a href="/?shopped={{$i}}"><button title="Gekauft">✔</button></a></td>
       </tr>
       {{end}}
     {{end}}
 </table>
+{{$total := .Items.Total}}
+<p>Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</p>
 
 <div id="addItem" class="addItem">
 <form action="/" method="post">
   <table>
     <tr>
+      <td><label for="item">Kategorie:</label></td>
+      <td>
+      <select class="value" id="category" onchange="catChanged()">
+        {{range $i,$e := .Categories }}<option value="{{$e}}">{{$e}}</option>{{end}}
+      </select>
+      </td>
+    </tr>
+    <tr>
       <td><label for="item">Was:</label></td>
-      <td><input class="value" list="items" name="item" id="item" ></td>
+      <td>
+      <select class="value" name="item" id="selectItem">
+        {{$first := .Categories.First}}
+        {{range $i,$e := .Items }}{{if eq $e.Category $first }}<option value="{{$e.Name}}">{{$e.Name}}</option>{{end}}{{end}}
+      </select>
+      </td>
     </tr>
     <tr>
       <td><label for="quantity">Wieviel:</label></td>
-      <td><input class="value" type="number" name="quantity" id="quantity" min="1" value="1"></td>
+      <td>
+      <select class="value" name="quantity" id="quantity">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="12">12</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+        <option value="500">500</option>
+      </select>
+      </td>
     </tr>
     <tr>
       <td></td>
@@ -46,10 +102,54 @@
     </tr>
   </table>
   <datalist id="items">
-    {{range $i,$e := . }}{{if le $e.QuantityRequired 0.1}}<option value="{{$e.Name}}">{{end}}{{end}}
+    {{range $i,$e := .Items }}<option id="{{$e.Category}}" value="{{$e.Name}}">{{$e.Name}}</option>{{end}}
   </datalist>
 </form>
+<a href="/add">Neu</a>
 </div>
+
+<div id="setQuantity" class="addItem">
+<form action="/" method="post">
+  <table>
+    <tr>
+      <td>Was:</td>
+      <td id="setQuantityName"></td>
+    </tr>
+    <tr>
+      <td><label for="quantity">Wieviel:</label></td>
+      <td>
+      <select id="setQuantitySelect" class="value" name="quantity" id="quantity">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="12">12</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+        <option value="500">500</option>
+      </select>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><button type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Ändern"></td>
+    </tr>
+  </table>
+  <input id="setQuantityId" type="hidden" name="id" value="">
+</form>
+</div>
+
 
 <p>
 <a href="/listAll">Alle Einträge</a>

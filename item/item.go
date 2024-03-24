@@ -13,7 +13,8 @@ type Category string
 type CategoryList []Category
 
 var Categories = CategoryList{
-	"Obst/Gemüse", "Kühlregal", "Brot", "Backzutaten", "Cerealien", "Konserven", "Fertiggerichte", "Hygiene", "Getränke", "Tiefkühl", "Süßes", "Anderes",
+	"Obst/Gemüse", "Kühlregal", "Kuchen", "Brot", "Tee/Kaffee", "Backzutaten", "Cerealien",
+	"Konserven", "Fertiggerichte", "Hygiene", "Getränke", "Tiefkühl", "Süßes", "Anderes",
 }
 
 var REWE = MapOrder(Categories...)
@@ -25,6 +26,10 @@ func (cl CategoryList) Index(category Category) int {
 		}
 	}
 	return len(cl) - 1
+}
+
+func (cl CategoryList) First() Category {
+	return (cl)[0]
 }
 
 const (
@@ -48,15 +53,22 @@ type HistoryEntry struct {
 
 type Items []*Item
 
-func (items Items) Carry() (weight, volume float64) {
+type Total struct {
+	Weight float64
+	Volume float64
+}
+
+func (items Items) Total() Total {
+	weight := 0.0
+	volume := 0.0
 	for _, item := range items {
-		q := float64(item.QuantityRequired)
+		q := item.QuantityRequired
 		if q > 0 {
-			weight += item.Weight * q
-			volume += item.Volume * q
+			weight += float64(item.Weight) * q
+			volume += float64(item.Volume) * q
 		}
 	}
-	return
+	return Total{Weight: weight / 1000, Volume: 1.12 * volume / 1000}
 }
 
 func (items Items) Save(file string) error {
@@ -117,14 +129,14 @@ type Item struct {
 	Name             string
 	QuantityRequired float64
 	Unit             string
-	Weight           float64
-	Volume           float64
+	Weight           int
+	Volume           int
 	Category         Category
 	ShopHistory      []HistoryEntry
 	OutlookState     OutlookState
 }
 
-func New(name string, unit string, weight float64, volume float64, category Category) *Item {
+func New(name string, unit string, weight int, volume int, category Category) *Item {
 	return &Item{
 		Name:     name,
 		Category: category,

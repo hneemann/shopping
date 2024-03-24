@@ -9,8 +9,12 @@ button, input, select {
     font-family: Arial, sans-serif;
     font-size:inherit
 }
-input.value {
+input.value, select.value {
     width: 13em;
+}
+
+td.number {
+    text-align: right;
 }
 
 div.addItem {

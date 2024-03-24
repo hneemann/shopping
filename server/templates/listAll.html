@@ -11,14 +11,18 @@
 <table>
       <tr>
         <td>Alle Einträge</td>
+        <td>Einheit</td>
+        <td>Kategorie</td>
+        <td>Gew.</td>
+        <td>Vol.</td>
       </tr>
     {{range $i,$e := . }}
       <tr>
         <td>{{$e.Name}}</td>
         <td>{{$e.Unit}}</td>
         <td>{{$e.Category}}</td>
-        <td>{{$e.Weight}}</td>
-        <td>{{$e.Volume}}</td>
+        <td class="number">{{$e.Weight}}</td>
+        <td class="number">{{$e.Volume}}</td>
         <td><a href="/edit/?item={{$i}}"><button>✍︎</button></a></td>
       </tr>
     {{end}}

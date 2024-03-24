@@ -10,7 +10,7 @@
 
 <p>Neues Lebensmittel</p>
 
-<form action="/add" method="post">
+<form action="/add/" method="post">
   <table>
      <tr>
        <td><label for="name">Name:</label></td>
@@ -30,6 +30,12 @@
          </select>
        </td>
      </tr>
+     {{if not .QHidden}}
+     <tr>
+       <td><label for="quantity">Anzahl:</label></td>
+       <td><input class="value" type="number" id="quantity" name="quantity" placeholder="Anzahl" value="{{.Quantity}}"/></td>
+     </tr>
+     {{end}}
      <tr>
        <td><label for="weight">Gewicht:</label></td>
        <td><input class="value" type="number" id="weight" name="weight" placeholder="Gewicht in g"/></td>
@@ -41,7 +47,9 @@
   </table>
   <a href="/"><button type="button">Abbrechen</button></a>
   <input type="submit" value="Hinzufügen">
+  {{if .QHidden}}
   <input type="hidden" name="quantity" value="{{.Quantity}}"/>
+  {{end}}
 
     <datalist id="units">
         <option value="Stück">

@@ -87,10 +87,10 @@ func (s *DataManager) RestoreData(user string, pass string) (*item.Items, error)
 			items := item.Items{
 				{Name: "Milch", QuantityRequired: 1, Unit: "l", Weight: 1000, Volume: 1000, Category: item.Cooled},
 				{Name: "Butter", QuantityRequired: 1, Unit: "Stück", Weight: 250, Volume: 250, Category: item.Cooled},
-				{Name: "Graubrot", QuantityRequired: 1, Unit: "Paket", Weight: 500, Volume: math.Pi * 9 * 9 / 2 * 8, Category: item.Bread},
+				{Name: "Graubrot", QuantityRequired: 1, Unit: "Paket", Weight: 500, Volume: int(math.Round(math.Pi * 9 * 9 / 2 * 8)), Category: item.Bread},
 				{Name: "Toastbrot", QuantityRequired: 1, Unit: "Paket", Weight: 500, Volume: 10 * 10 * 25, Category: item.Bread},
 				{Name: "Katzenpfötchen", QuantityRequired: 1, Unit: "Paket", Weight: 175, Volume: 13 * 13 * 2, Category: item.Sweets},
-				{Name: "Mini-Pizzen", QuantityRequired: 1, Unit: "Stück", Weight: 432, Volume: 2.8 * 28 * 23, Category: item.Frozen},
+				{Name: "Mini-Pizzen", QuantityRequired: 1, Unit: "Stück", Weight: 432, Volume: int(math.Round(2.8 * 28 * 23)), Category: item.Frozen},
 			}
 			items.Order(item.REWE)
 			return &items, nil
@@ -122,7 +122,7 @@ func main() {
 	mux.HandleFunc("/login", session.LoginHandler(sc, server.Templates.Lookup("login.html")))
 	mux.HandleFunc("/register", session.RegisterHandler(sc, server.Templates.Lookup("register.html")))
 	mux.HandleFunc("/", session.CheckSessionFunc(sc, server.MainHandler))
-	mux.HandleFunc("/add", session.CheckSessionFunc(sc, server.AddHandler))
+	mux.HandleFunc("/add/", session.CheckSessionFunc(sc, server.AddHandler))
 
 	mux.HandleFunc("/listAll", session.CheckSessionFunc(sc, server.ListAllHandler))
 	mux.HandleFunc("/edit/", session.CheckSessionFunc(sc, server.EditHandler))
