@@ -111,11 +111,12 @@ func main() {
 	port := flag.Int("port", 8090, "port")
 	cert := flag.String("cert", "cert.pem", "certificate")
 	key := flag.String("key", "key.pem", "certificate")
+	debug := flag.Bool("debug", false, "starts server in debug mode")
 	flag.Parse()
 
 	sc := session.NewSessionCache[item.Items](
 		&DataManager{folder: *folder},
-		10*time.Minute,
+		30*time.Minute,
 	)
 
 	mux := http.NewServeMux()
@@ -126,7 +127,14 @@ func main() {
 
 	mux.HandleFunc("/listAll", session.CheckSessionFunc(sc, server.ListAllHandler))
 	mux.HandleFunc("/edit/", session.CheckSessionFunc(sc, server.EditHandler))
-	mux.Handle("/assets/", http.FileServer(http.FS(server.AssetFS)))
+
+	assetServer := http.FileServer(http.FS(server.AssetFS))
+	if *debug {
+		log.Println("Starting in debug mode!")
+	} else {
+		assetServer = Cache(assetServer)
+	}
+	mux.Handle("/assets/", assetServer)
 
 	serv := &http.Server{Addr: ":" + strconv.Itoa(*port), Handler: mux}
 
@@ -150,5 +158,12 @@ func main() {
 	err := serv.ListenAndServeTLS(*cert, *key)
 	if err != nil {
 		log.Println(err)
+	}
+}
+
+func Cache(parent http.Handler) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Add("Cache-Control", "public, max-age=28800") // 8h
+		parent.ServeHTTP(writer, request)
 	}
 }
