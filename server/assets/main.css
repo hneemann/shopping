@@ -1,10 +1,22 @@
+
+@media (pointer: coarse) {
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 250%;
+    }
+}
+
+@media (pointer: fine) {
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 150%;
+    }
+}
+
 td {
     padding: 0.3em;
 }
-body {
-    font-family: Arial, sans-serif;
-    font-size: 200%;
-}
+
 button, input, select {
     font-family: Arial, sans-serif;
     font-size:inherit
