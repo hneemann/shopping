@@ -68,7 +68,7 @@ func (items Items) Total() Total {
 			volume += float64(item.Volume) * q
 		}
 	}
-	return Total{Weight: weight / 1000, Volume: 1.12 * volume / 1000}
+	return Total{Weight: weight / 1000, Volume: volume / 1000 / 0.87}
 }
 
 func (items Items) Save(file string) error {
