@@ -12,23 +12,27 @@
 
 <table>
     <tr>
-      <td colspan="4" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
+      <td><a href="/listAll"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
+      <td colspan="3" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
       <td><img class="normal" onclick="showPopUpById('addItem')" src="/assets/add.svg" title="Artikel hinzufügen"></td>
     </tr>
     {{$lastCat := ""}}
+    {{$hide := .HideCart}}
     {{range $i,$e := .Items }}
       {{if gt $e.QuantityRequired 0.0}}
-      {{if not (eq $e.Category $lastCat) }}
-      <tr><th colspan="5">{{$e.Category}}</th></tr>
-      {{end}}
-      <tr>
-        <td {{if $e.Basket}}class="basket"{{end}}><a href="/?del={{$i}}"><img class="list" src="/assets/delete.svg" title="Entfernen"></a></td>
-        <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
-        <td {{if $e.Basket}}class="numberBasket"{{else}}class="number"{{end}} onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
-        <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Unit}}</td>
-        <td {{if $e.Basket}}class="basket"{{end}}><a href="/?shopped={{$i}}"><img class="list" src="/assets/sCar.svg"></a></td>
-      </tr>
-      {{$lastCat = $e.Category}}
+        {{if not (and $hide $e.Basket) }}
+          {{if not (eq $e.Category $lastCat) }}
+          <tr><th colspan="5">{{$e.Category}}</th></tr>
+          {{end}}
+          <tr>
+            <td {{if $e.Basket}}class="basket"{{end}}><a href="/?del={{$i}}"><img class="list" src="/assets/delete.svg" title="Entfernen"></a></td>
+            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
+            <td {{if $e.Basket}}class="numberBasket"{{else}}class="number"{{end}} onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
+            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Unit}}</td>
+            <td {{if $e.Basket}}class="basket"{{end}}><a href="/?shopped={{$i}}"><img class="list" src="/assets/sCar.svg"></a></td>
+          </tr>
+          {{$lastCat = $e.Category}}
+        {{end}}
       {{end}}
     {{end}}
 
@@ -38,9 +42,13 @@
     </tr>
 
     <tr>
-    <td colspan="4"></td><td><img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt"></td>
+    <td>
+    {{if .HideCart}}<a href="/"><img class="list" src="/assets/complete.svg" title="Zeige alles"></a>{{end}}
+    </td>
+    <td colspan="3"></td><td><img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt"></td>
     </tr>
 </table>
+
 
 <div id="payed" class="addItem">
 Wirklich alle grünen Artikel gekauft?<br><br>
@@ -149,8 +157,6 @@ Wirklich alle grünen Artikel gekauft?<br><br>
   <input id="setQuantityId" type="hidden" name="id" value="">
 </form>
 </div>
-
-<p><a href="/listAll">Alle Artikel</a></p>
 
 </body>
 </html>

@@ -24,6 +24,7 @@ var addTemp = Templates.Lookup("add.html")
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
 		categorySelected := item.Categories[0]
+		hideCart := false
 		if r.Method == http.MethodPost {
 			submit := r.FormValue("submit")
 			if submit == "Hinzufügen" {
@@ -71,6 +72,7 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 					id, err := strconv.Atoi(shopped)
 					if err == nil {
 						data.Shopped(id)
+						hideCart = true
 					}
 				}
 			}
@@ -84,10 +86,12 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 
 		d := struct {
 			Items            *item.Items
+			HideCart         bool
 			Categories       item.CategoryList
 			CategorySelected item.Category
 		}{
 			Items:            data,
+			HideCart:         hideCart,
 			Categories:       item.Categories,
 			CategorySelected: categorySelected,
 		}
