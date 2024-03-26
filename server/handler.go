@@ -2,6 +2,7 @@ package server
 
 import (
 	"embed"
+	"fmt"
 	"github.com/hneemann/shopping/item"
 	"html/template"
 	"log"
@@ -32,60 +33,9 @@ type mainData struct {
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
 		categorySelected := item.Categories[0]
-		hideCart := false
-		if r.Method == http.MethodPost {
-			submit := r.FormValue("submit")
-			if submit == "Hinzufügen" {
-				itemName := r.FormValue("item")
-				quantity := toFloat(r.FormValue("quantity"))
-				found := false
-				if quantity > 0 {
-					for _, e := range *data {
-						if e.Name == itemName {
-							e.SetRequired(e.QuantityRequired + quantity)
-							e.Basket = false
-							categorySelected = e.Category
-							found = true
-							break
-						}
-					}
-				}
-				if !found {
-					err := addTemp.Execute(w, addData{
-						Name:       itemName,
-						Quantity:   quantity,
-						QHidden:    true,
-						Categories: item.Categories,
-					})
-					if err != nil {
-						log.Println(err)
-					}
-					return
-				}
-			}
-			if submit == "Ändern" {
-				quantity := toFloat(r.FormValue("quantity"))
-				id, err := strconv.Atoi(r.FormValue("id"))
-				if err == nil && id >= 0 && id < len(*data) {
-					it := (*data)[id]
-					it.SetRequired(quantity)
-					it.Basket = false
-					categorySelected = it.Category
-				}
-			}
-		} else {
-			query := r.URL.Query()
-			if uh := query.Get("h"); uh != "" {
-				hideCart = true
-			}
-			if payed := query.Get("payed"); payed != "" {
-				data.Payed()
-			}
-		}
-
 		err := mainTemp.Execute(w, mainData{
 			Items:            data,
-			HideCart:         hideCart,
+			HideCart:         false,
 			Categories:       item.Categories,
 			CategorySelected: categorySelected,
 		})
@@ -103,12 +53,20 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 			id := toInt(idStr)
 			mode := query.Get("mode")
 			if id >= 0 && id < len(*data) {
-				if mode == "car" {
+				switch mode {
+				case "car":
 					(*data).Shopped(id)
-				}
-				if mode == "del" {
+				case "del":
 					(*data).Delete(id)
+				case "set":
+					(*data).SetQuantity(id, toInt(query.Get("q")))
 				}
+			}
+		} else {
+			action := query.Get("a")
+			switch action {
+			case "payed":
+				data.Payed()
 			}
 		}
 
@@ -121,6 +79,22 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 	}
+}
+
+func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
+	if data, ok := r.Context().Value("data").(*item.Items); ok {
+		query := r.URL.Query()
+		idStr := query.Get("id")
+		if idStr != "" {
+			id := toInt(idStr)
+			if id >= 0 && id < len(*data) {
+				q := (*data).ModQuantity(id, toInt(query.Get("n")))
+				w.Write([]byte(fmt.Sprintf("%1.0f", q)))
+				return
+			}
+		}
+	}
+	w.Write([]byte("-"))
 }
 
 func toFloat(str string) float64 {

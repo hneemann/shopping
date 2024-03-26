@@ -5,8 +5,8 @@
   <title>Liste</title>
   <link rel="icon" type="image/svg" href="/assets/icon.svg">
   <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
+  <script type="text/javascript" src="/assets/popup.js"></script>
   <script type="text/javascript" src="/assets/main.js"></script>
-  <script type="text/javascript" src="/assets/select.js"></script>
 </head>
 <body>
 
@@ -16,12 +16,11 @@
 
 <div id="payed" class="addItem">
 Wirklich alle grünen Artikel gekauft?<br><br>
-<button onclick="hidePopUp()" title="Bezahlt">Abbrechen</button>
-<a href="/?payed=1"><button title="Bezahlt">Gekauft</button></a>
+<button onclick="hidePopUp();" title="Bezahlt">Abbrechen</button>
+<button onclick="hidePopUp();updateTable('a=payed');" title="Bezahlt">Gekauft</button>
 </div>
 
 <div id="addItem" class="addItem">
-<form action="/" method="post">
   <table>
     <tr>
       <td><label for="item">Kategorie:</label></td>
@@ -35,16 +34,16 @@ Wirklich alle grünen Artikel gekauft?<br><br>
     <tr>
       <td><label for="item">Was:</label></td>
       <td>
-      <select class="value" name="item" id="selectItem">
+      <select class="value" name="item" id="addItemItem">
         {{$cs := .CategorySelected}}
-        {{range $i,$e := .Items }}{{if eq $e.Category $cs }}<option value="{{$e.Name}}">{{$e.Name}}</option>{{end}}{{end}}
+        {{range $i,$e := .Items }}{{if eq $e.Category $cs }}<option value="{{$i}}">{{$e.Name}}</option>{{end}}{{end}}
       </select>
       </td>
     </tr>
     <tr>
       <td><label for="quantity">Wieviel:</label></td>
       <td>
-      <select class="value" name="quantity" id="quantity">
+      <select class="value" name="quantity" id="addItemQuantity">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -69,19 +68,17 @@ Wirklich alle grünen Artikel gekauft?<br><br>
     </tr>
     <tr>
       <td></td>
-      <td><button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Hinzufügen"></td>
+      <td><button class="dialog" type="button" onclick="hidePopUp();">Abbrechen</button>
+          <button type="button"  onclick="hidePopUp();addItem();">Hinzufügen</button></td>
     </tr>
   </table>
   <datalist id="items">
     {{range $i,$e := .Items }}<option id="{{$e.Category}}" value="{{$e.Name}}">{{$e.Name}}</option>{{end}}
   </datalist>
-  <input id="categorySelected" type="hidden" name="categorySelected" value="">
-</form>
-<a href="/add">Neu</a>
+  <a href="/add">Neu</a>
 </div>
 
 <div id="setQuantity" class="addItem">
-<form action="/" method="post">
   <table>
     <tr>
       <td>Was:</td>
@@ -90,7 +87,7 @@ Wirklich alle grünen Artikel gekauft?<br><br>
     <tr>
       <td><label for="quantity">Wieviel:</label></td>
       <td>
-      <select id="setQuantitySelect" class="value" name="quantity" id="quantity">
+      <select id="setQuantitySelect" class="value" name="quantity">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -115,11 +112,10 @@ Wirklich alle grünen Artikel gekauft?<br><br>
     </tr>
     <tr>
       <td></td>
-      <td><button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button><input type="submit" name="submit" value="Ändern"></td>
+      <td><button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button>
+          <button type="button" onclick="hidePopUp();modifyQuantity();">Ändern</button></td>
     </tr>
   </table>
-  <input id="setQuantityId" type="hidden" name="id" value="">
-</form>
 </div>
 
 </body>

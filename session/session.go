@@ -179,6 +179,20 @@ func CheckSession[S any](sc *sessionCache[S], parent http.Handler) http.HandlerF
 	}
 }
 
+func CheckSessionRest[S any](sc *sessionCache[S], parent http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if c, err := r.Cookie("id"); err == nil {
+			id := c.Value
+			if s := sc.getSession(id); s != nil {
+				nc := context.WithValue(r.Context(), "data", s)
+				parent.ServeHTTP(w, r.WithContext(nc))
+				return
+			}
+		}
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+}
+
 func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http.HandlerFunc {
 	if loginTemp == nil {
 		panic("login template is nil")

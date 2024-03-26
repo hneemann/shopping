@@ -118,6 +118,35 @@ func (items Items) Delete(id int) {
 	i.Basket = false
 }
 
+func (items Items) SetQuantity(id, q int) {
+	if id < 0 || id >= len(items) {
+		return
+	}
+	if q < 0 {
+		q = 0
+	}
+	i := items[id]
+	i.QuantityRequired = float64(q)
+	i.Basket = false
+}
+
+func (items Items) ModQuantity(id, n int) float64 {
+	if id < 0 || id >= len(items) {
+		return 0
+	}
+	i := items[id]
+	if i.Weight == 1 {
+		i.QuantityRequired += float64(n) * 50
+	} else {
+		i.QuantityRequired += float64(n)
+	}
+	if i.QuantityRequired < 0 {
+		i.QuantityRequired = 0
+	}
+	i.Basket = false
+	return i.QuantityRequired
+}
+
 func (items Items) SomethingHidden() bool {
 	for _, item := range items {
 		if item.QuantityRequired > 0 && item.Basket {

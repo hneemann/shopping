@@ -1,5 +1,5 @@
     <tr>
-      <td><a href="/listAll"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
+      <td><a href="/listAll"><img class="list" src="/assets/icon.svg" title="Bearbeiten"></a></td>
       <td colspan="3" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
       <td><img class="normal" onclick="showPopUpById('addItem')" src="/assets/add.svg" title="Artikel hinzufügen"></td>
     </tr>
@@ -12,11 +12,11 @@
           <tr><th colspan="5">{{$e.Category}}</th></tr>
           {{end}}
           <tr>
-            <td {{if $e.Basket}}class="basket"{{end}}><img id="del_{{$i}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="update({{$i}},'del')"></td>
+            <td><img id="del_{{$i}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="updateItem({{$i}},'del')"></td>
             <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
-            <td {{if $e.Basket}}class="numberBasket"{{else}}class="number"{{end}} onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
-            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Unit}}</td>
-            <td {{if $e.Basket}}class="basket"{{end}}><img id="car_{{$i}}" class="list" src="/assets/sCar.svg" onclick="update({{$i}},'car')"></td>
+            <td class="number" onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
+            <td>{{$e.Unit}}</td>
+            <td><img id="car_{{$i}}" class="list" src="/assets/sCar.svg" onclick="updateItem({{$i}},'car')"></td>
           </tr>
           {{$lastCat = $e.Category}}
         {{end}}
@@ -31,8 +31,8 @@
     {{if .Items.SomethingHidden}}
     <tr>
     <td>
-      {{if .HideCart}}<img class="list" onclick="hide(0)" src="/assets/eye.svg" title="Zeige Alles">
-      {{else        }}<img class="list" onclick="hide(1)" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes">{{end}}
+      {{if .HideCart}}<img class="list" onclick="updateTable('h=0')" src="/assets/eye.svg" title="Zeige Alles">
+      {{else        }}<img class="list" onclick="updateTable('h=1')" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes">{{end}}
     </td>
     <td colspan="3"></td><td>
       <img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt">

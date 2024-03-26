@@ -50,11 +50,8 @@ td.number {
 }
 
 td.basket {
-    background: #90ee90;
-}
-td.numberBasket {
-    text-align: right;
-    background: #90ee90;
+    text-decoration-line: line-through;
+    text-decoration-thickness: 15%;
 }
 
 div.addItem {

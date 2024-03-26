@@ -5,17 +5,20 @@
   <title>Liste</title>
   <link rel="icon" type="image/svg" href="/assets/icon.svg">
   <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
-  <script type="text/javascript" src="/assets/main.js"></script>
+  <script type="text/javascript" src="/assets/listAll.js"></script>
 </head>
 <body>
 
 <table>
     <tr>
-      <td colspan="5" style="font-size:115%;font-weight:bold;">Alle {{len .}} Einträge</td>
+      <td colspan="8" style="font-size:115%;font-weight:bold;">Alle {{len .}} Einträge</td>
       <td><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a></td>
     </tr>
       <tr>
         <th>Name</th>
+        <th></th>
+        <th>N</th>
+        <th></th>
         <th>Einheit</th>
         <th>Kategorie</th>
         <th>Gew.</th>
@@ -24,6 +27,9 @@
     {{range $i,$e := . }}
       <tr>
         <td>{{$e.Name}}</td>
+        <td><img class="list" onclick="modify({{$i}},-1)" src="/assets/sub.svg"></td>
+        <td id="q{{$i}}">{{$e.QuantityRequired}}</td>
+        <td><img class="list" onclick="modify({{$i}},1)" src="/assets/add.svg"></td>
         <td>{{$e.Unit}}</td>
         <td>{{$e.Category}}</td>
         <td class="number">{{$e.Weight}}</td>

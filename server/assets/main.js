@@ -1,41 +1,47 @@
-let elementVisible = null
-let aCallOnHide = null
+let quantityModifyId = 0;
 
-function showPopUpById(id, callOnHide) {
-    hidePopUp()
-    setTimeout(function () {
-        elementVisible = document.getElementById(id);
-        if (elementVisible!=null) {
-            elementVisible.style.visibility = "visible"
-            aCallOnHide = callOnHide
-        }
-    })
+function showSetQuantity(name, quantity, id) {
+    document.getElementById('setQuantityName').innerHTML = name;
+    document.getElementById('setQuantitySelect').value = quantity;
+    quantityModifyId = id;
+    showPopUpById('setQuantity');
 }
 
-document.addEventListener("click", (evt) => {
-    if (elementVisible != null) {
-        let targetEl = evt.target; // clicked element
-        do {
-            if (targetEl === elementVisible) {
-                // This is a click inside, does nothing, just return.
-                return;
-            }
-            // Go up the DOM
-            targetEl = targetEl.parentNode;
-        } while (targetEl);
-        // This is a click outside.
-        hidePopUp()
-        evt.preventDefault()
-    }
-});
+function modifyQuantity() {
+    let q = document.getElementById('setQuantitySelect').value;
+    updateTable("id=" + quantityModifyId + "&mode=set&q=" + q)
+}
 
-function hidePopUp() {
-    if (elementVisible != null) {
-        elementVisible.style.visibility = "hidden"
-        elementVisible = null
-        if (aCallOnHide != null) {
-            aCallOnHide();
-            aCallOnHide = null
+function addItem() {
+    let id = document.getElementById('addItemItem').value;
+    let q = document.getElementById('addItemQuantity').value;
+    updateTable("id=" + id + "&mode=set&q=" + q)
+}
+
+function catChanged() {
+    var category = document.getElementById('category').value;
+    var items = document.getElementById('items').getElementsByTagName('option');
+    let found = "";
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].id === category) {
+            found+='<option value="' + i + '">' + items[i].value + '</option>'
         }
     }
+    document.getElementById('addItemItem').innerHTML = found;
+}
+
+function updateItem(id, mode) {
+    document.getElementById(mode + "_" + id).hidden = true;
+    updateTable("id=" + id + "&mode=" + mode)
+}
+
+function updateTable(query) {
+    fetch("/table/?" + query)
+        .then(function (response) {
+            return response.text()
+        })
+        .then(function (html) {
+            let table = document.getElementById('table');
+            table.innerHTML = html;
+        })
 }
