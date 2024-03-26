@@ -10,51 +10,14 @@
 </head>
 <body>
 
-<table>
-    <tr>
-      <td><a href="/listAll"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
-      <td colspan="3" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
-      <td><img class="normal" onclick="showPopUpById('addItem')" src="/assets/add.svg" title="Artikel hinzufügen"></td>
-    </tr>
-    {{$lastCat := ""}}
-    {{$hide := .HideCart}}
-    {{range $i,$e := .Items }}
-      {{if gt $e.QuantityRequired 0.0}}
-        {{if not (and $hide $e.Basket) }}
-          {{if not (eq $e.Category $lastCat) }}
-          <tr><th colspan="5">{{$e.Category}}</th></tr>
-          {{end}}
-          <tr>
-            <td {{if $e.Basket}}class="basket"{{end}}><a href="/?del={{$i}}"><img class="list" src="/assets/delete.svg" title="Entfernen"></a></td>
-            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
-            <td {{if $e.Basket}}class="numberBasket"{{else}}class="number"{{end}} onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
-            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Unit}}</td>
-            <td {{if $e.Basket}}class="basket"{{end}}><a href="/?shopped={{$i}}"><img class="list" src="/assets/sCar.svg"  id="car_{{$i}}" onclick="hide('car_{{$i}}')"></a></td>
-          </tr>
-          {{$lastCat = $e.Category}}
-        {{end}}
-      {{end}}
-    {{end}}
-
-    <tr>
-    {{$total := .Items.Total}}
-    <td style="padding-top: 1em; padding-bottom: 1em;" colspan="5">Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</td>
-    </tr>
-
-    <tr>
-    <td>
-    {{if .HideCart}}<a href="/"><img class="normal" src="/assets/eye.svg" title="Zeige Alles"></a>{{else}}
-    <a href="/?h=1"><img class="normal" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes"></a>{{end}}
-    </td>
-    <td colspan="3"></td><td><img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt"></td>
-    </tr>
+<table id="table">
+{{template "table.html" .}}
 </table>
-
 
 <div id="payed" class="addItem">
 Wirklich alle grünen Artikel gekauft?<br><br>
 <button onclick="hidePopUp()" title="Bezahlt">Abbrechen</button>
-<a href="/?shopped=payed"><button title="Bezahlt">Gekauft</button></a>
+<a href="/?payed=1"><button title="Bezahlt">Gekauft</button></a>
 </div>
 
 <div id="addItem" class="addItem">

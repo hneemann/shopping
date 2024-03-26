@@ -18,6 +18,14 @@ function catChanged() {
     document.getElementById('categorySelected').value = category;
 }
 
-function hide(id) {
-    document.getElementById(id).hidden = true;
+function update(id, mode) {
+    document.getElementById(mode + "_" + id).hidden = true;
+    fetch("/table/?id=" + id + "&mode=" + mode)
+        .then(function (response) {
+            return response.text()
+        })
+        .then(function (html) {
+            let table = document.getElementById('table');
+            table.innerHTML=html;
+        })
 }

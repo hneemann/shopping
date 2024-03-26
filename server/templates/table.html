@@ -1,0 +1,39 @@
+    <tr>
+      <td><a href="/listAll"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
+      <td colspan="3" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
+      <td><img class="normal" onclick="showPopUpById('addItem')" src="/assets/add.svg" title="Artikel hinzufügen"></td>
+    </tr>
+    {{$lastCat := ""}}
+    {{$hide := .HideCart}}
+    {{range $i,$e := .Items }}
+      {{if gt $e.QuantityRequired 0.0}}
+        {{if not (and $hide $e.Basket) }}
+          {{if not (eq $e.Category $lastCat) }}
+          <tr><th colspan="5">{{$e.Category}}</th></tr>
+          {{end}}
+          <tr>
+            <td {{if $e.Basket}}class="basket"{{end}}><img id="del_{{$i}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="update({{$i}},'del')"></td>
+            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
+            <td {{if $e.Basket}}class="numberBasket"{{else}}class="number"{{end}} onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
+            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Unit}}</td>
+            <td {{if $e.Basket}}class="basket"{{end}}><img id="car_{{$i}}" class="list" src="/assets/sCar.svg" onclick="update({{$i}},'car')"></td>
+          </tr>
+          {{$lastCat = $e.Category}}
+        {{end}}
+      {{end}}
+    {{end}}
+
+    <tr>
+    {{$total := .Items.Total}}
+    <td style="padding-top: 1em; padding-bottom: 1em;" colspan="5">Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</td>
+    </tr>
+
+    <tr>
+    <td>
+    {{if .Items.SomethingHidden}}
+      {{if .HideCart}}<a href="/"><img class="list" src="/assets/eye.svg" title="Zeige Alles"></a>
+      {{else        }}<a href="/?h=1"><img class="list" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes"></a>{{end}}
+    {{end}}
+    </td>
+    <td colspan="3"></td><td><img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt"></td>
+    </tr>

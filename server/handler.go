@@ -19,7 +19,15 @@ var AssetFS embed.FS
 var Templates = template.Must(template.New("").ParseFS(templateFS, "templates/*.html"))
 
 var mainTemp = Templates.Lookup("main.html")
+var tableTemp = Templates.Lookup("table.html")
 var addTemp = Templates.Lookup("add.html")
+
+type mainData struct {
+	Items            *item.Items
+	HideCart         bool
+	Categories       item.CategoryList
+	CategorySelected item.Category
+}
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
@@ -70,39 +78,42 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 			if uh := query.Get("h"); uh != "" {
 				hideCart = true
 			}
-
-			if shopped := query.Get("shopped"); shopped != "" {
-				if shopped == "payed" {
-					data.Payed()
-				} else {
-					id, err := strconv.Atoi(shopped)
-					if err == nil {
-						data.Shopped(id)
-						hideCart = true
-					}
-				}
-			}
-			if del := query.Get("del"); del != "" {
-				id, err := strconv.Atoi(del)
-				if err == nil {
-					data.Delete(id)
-				}
+			if payed := query.Get("payed"); payed != "" {
+				data.Payed()
 			}
 		}
 
-		d := struct {
-			Items            *item.Items
-			HideCart         bool
-			Categories       item.CategoryList
-			CategorySelected item.Category
-		}{
+		err := mainTemp.Execute(w, mainData{
 			Items:            data,
 			HideCart:         hideCart,
 			Categories:       item.Categories,
 			CategorySelected: categorySelected,
+		})
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func TableHandler(w http.ResponseWriter, r *http.Request) {
+	if data, ok := r.Context().Value("data").(*item.Items); ok {
+		query := r.URL.Query()
+		id := toInt(query.Get("id"))
+		mode := query.Get("mode")
+		if id >= 0 && id < len(*data) {
+			if mode == "car" {
+				(*data).Shopped(id)
+			}
+			if mode == "del" {
+				(*data).Delete(id)
+			}
 		}
 
-		err := mainTemp.Execute(w, d)
+		err := tableTemp.Execute(w, mainData{
+			Items:      data,
+			HideCart:   true,
+			Categories: item.Categories,
+		})
 		if err != nil {
 			log.Println(err)
 		}

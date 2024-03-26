@@ -118,6 +118,15 @@ func (items Items) Delete(id int) {
 	i.Basket = false
 }
 
+func (items Items) SomethingHidden() bool {
+	for _, item := range items {
+		if item.QuantityRequired > 0 && item.Basket {
+			return true
+		}
+	}
+	return false
+}
+
 func MapOrder(str ...Category) func(Category) int {
 	m := make(map[Category]int)
 	for i, s := range str {

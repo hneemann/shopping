@@ -126,6 +126,7 @@ func main() {
 	mux.HandleFunc("/login", session.LoginHandler(sc, server.Templates.Lookup("login.html")))
 	mux.HandleFunc("/register", session.RegisterHandler(sc, server.Templates.Lookup("register.html")))
 	mux.HandleFunc("/", session.CheckSessionFunc(sc, server.MainHandler))
+	mux.HandleFunc("/table/", session.CheckSessionFunc(sc, server.TableHandler))
 	mux.HandleFunc("/add/", session.CheckSessionFunc(sc, server.AddHandler))
 
 	mux.HandleFunc("/listAll", session.CheckSessionFunc(sc, server.ListAllHandler))
