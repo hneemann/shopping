@@ -98,20 +98,23 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 func TableHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
 		query := r.URL.Query()
-		id := toInt(query.Get("id"))
-		mode := query.Get("mode")
-		if id >= 0 && id < len(*data) {
-			if mode == "car" {
-				(*data).Shopped(id)
-			}
-			if mode == "del" {
-				(*data).Delete(id)
+		idStr := query.Get("id")
+		if idStr != "" {
+			id := toInt(idStr)
+			mode := query.Get("mode")
+			if id >= 0 && id < len(*data) {
+				if mode == "car" {
+					(*data).Shopped(id)
+				}
+				if mode == "del" {
+					(*data).Delete(id)
+				}
 			}
 		}
 
 		err := tableTemp.Execute(w, mainData{
 			Items:      data,
-			HideCart:   true,
+			HideCart:   query.Get("h") != "0",
 			Categories: item.Categories,
 		})
 		if err != nil {

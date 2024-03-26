@@ -29,3 +29,14 @@ function update(id, mode) {
             table.innerHTML=html;
         })
 }
+
+function hide(mode) {
+    fetch("/table/?h=" + mode)
+        .then(function (response) {
+            return response.text()
+        })
+        .then(function (html) {
+            let table = document.getElementById('table');
+            table.innerHTML=html;
+        })
+}

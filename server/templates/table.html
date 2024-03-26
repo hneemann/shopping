@@ -31,8 +31,8 @@
     <tr>
     <td>
     {{if .Items.SomethingHidden}}
-      {{if .HideCart}}<a href="/"><img class="list" src="/assets/eye.svg" title="Zeige Alles"></a>
-      {{else        }}<a href="/?h=1"><img class="list" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes"></a>{{end}}
+      {{if .HideCart}}<img class="list" onclick="hide(0)" src="/assets/eye.svg" title="Zeige Alles">
+      {{else        }}<img class="list" onclick="hide(1)" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes">{{end}}
     {{end}}
     </td>
     <td colspan="3"></td><td><img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt"></td>
