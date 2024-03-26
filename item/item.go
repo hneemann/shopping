@@ -96,10 +96,11 @@ func (items Items) Shopped(id int) {
 }
 
 func (items Items) Payed() {
+	ti := time.Now()
 	for _, item := range items {
 		if item.QuantityRequired > 0 && item.Basket {
 			item.ShopHistory = append(item.ShopHistory, HistoryEntry{
-				ShopTime: time.Now(),
+				ShopTime: ti,
 				Quantity: item.QuantityRequired,
 			})
 			item.QuantityRequired = 0
@@ -112,7 +113,9 @@ func (items Items) Delete(id int) {
 	if id < 0 || id >= len(items) {
 		return
 	}
-	items[id].QuantityRequired = 0
+	i := items[id]
+	i.QuantityRequired = 0
+	i.Basket = false
 }
 
 func MapOrder(str ...Category) func(Category) int {

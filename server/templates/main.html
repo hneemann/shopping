@@ -29,7 +29,7 @@
             <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
             <td {{if $e.Basket}}class="numberBasket"{{else}}class="number"{{end}} onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
             <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Unit}}</td>
-            <td {{if $e.Basket}}class="basket"{{end}}><a href="/?shopped={{$i}}"><img class="list" src="/assets/sCar.svg"></a></td>
+            <td {{if $e.Basket}}class="basket"{{end}}><a href="/?shopped={{$i}}"><img class="list" src="/assets/sCar.svg"  id="car_{{$i}}" onclick="hide('car_{{$i}}')"></a></td>
           </tr>
           {{$lastCat = $e.Category}}
         {{end}}
@@ -43,7 +43,8 @@
 
     <tr>
     <td>
-    {{if .HideCart}}<a href="/"><img class="list" src="/assets/complete.svg" title="Zeige alles"></a>{{end}}
+    {{if .HideCart}}<a href="/"><img class="normal" src="/assets/eye.svg" title="Zeige Alles"></a>{{else}}
+    <a href="/?h=1"><img class="normal" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes"></a>{{end}}
     </td>
     <td colspan="3"></td><td><img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt"></td>
     </tr>

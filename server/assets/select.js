@@ -1,4 +1,4 @@
-function showSetQuantity(name,quantity,id) {
+function showSetQuantity(name, quantity, id) {
     document.getElementById('setQuantityName').innerHTML = name;
     document.getElementById('setQuantitySelect').value = quantity;
     document.getElementById('setQuantityId').value = id;
@@ -15,5 +15,9 @@ function catChanged() {
         }
     }
     document.getElementById('selectItem').innerHTML = found.map(e => '<option value="' + e + '">' + e + '</option>').join('');
-    document.getElementById('categorySelected').value=category;
+    document.getElementById('categorySelected').value = category;
+}
+
+function hide(id) {
+    document.getElementById(id).hidden = true;
 }

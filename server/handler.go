@@ -35,6 +35,7 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 					for _, e := range *data {
 						if e.Name == itemName {
 							e.SetRequired(e.QuantityRequired + quantity)
+							e.Basket = false
 							categorySelected = e.Category
 							found = true
 							break
@@ -60,11 +61,16 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 				if err == nil && id >= 0 && id < len(*data) {
 					it := (*data)[id]
 					it.SetRequired(quantity)
+					it.Basket = false
 					categorySelected = it.Category
 				}
 			}
 		} else {
 			query := r.URL.Query()
+			if uh := query.Get("h"); uh != "" {
+				hideCart = true
+			}
+
 			if shopped := query.Get("shopped"); shopped != "" {
 				if shopped == "payed" {
 					data.Payed()
