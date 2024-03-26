@@ -13,8 +13,23 @@
     }
 }
 
+img.list {
+    width: 1.2em;
+    position: relative;
+    top: 0.1em;
+}
+
+img.normal {
+    width: 1.75em;
+}
+
 td {
     padding: 0.3em;
+}
+
+th {
+    padding: 0.3em;
+    text-align: left;
 }
 
 button, input, select {
@@ -34,6 +49,14 @@ td.number {
     text-align: right;
 }
 
+td.basket {
+    background: #90ee90;
+}
+td.numberBasket {
+    text-align: right;
+    background: #90ee90;
+}
+
 div.addItem {
     border-style: solid;
     border-color: darkgray;
@@ -47,3 +70,8 @@ div.addItem {
     margin-left: -10em;
     z-index: 5;
 }
+
+table {
+    border-collapse: collapse;
+}
+

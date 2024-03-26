@@ -65,9 +65,13 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			query := r.URL.Query()
 			if shopped := query.Get("shopped"); shopped != "" {
-				id, err := strconv.Atoi(shopped)
-				if err == nil {
-					data.Shopped(id)
+				if shopped == "payed" {
+					data.Payed()
+				} else {
+					id, err := strconv.Atoi(shopped)
+					if err == nil {
+						data.Shopped(id)
+					}
 				}
 			}
 			if del := query.Get("del"); del != "" {

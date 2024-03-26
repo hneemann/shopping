@@ -91,11 +91,20 @@ func (items Items) Shopped(id int) {
 	}
 	item := items[id]
 	if item.QuantityRequired > 0 {
-		item.ShopHistory = append(item.ShopHistory, HistoryEntry{
-			ShopTime: time.Now(),
-			Quantity: item.QuantityRequired,
-		})
-		item.QuantityRequired = 0
+		item.Basket = !item.Basket
+	}
+}
+
+func (items Items) Payed() {
+	for _, item := range items {
+		if item.QuantityRequired > 0 && item.Basket {
+			item.ShopHistory = append(item.ShopHistory, HistoryEntry{
+				ShopTime: time.Now(),
+				Quantity: item.QuantityRequired,
+			})
+			item.QuantityRequired = 0
+			item.Basket = false
+		}
 	}
 }
 
@@ -128,6 +137,7 @@ func (items Items) Order(c func(Category) int) {
 type Item struct {
 	Name             string
 	QuantityRequired float64
+	Basket           bool
 	Unit             string
 	Weight           int
 	Volume           int

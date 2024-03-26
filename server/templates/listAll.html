@@ -10,12 +10,15 @@
 <body>
 
 <table>
+    <tr>
+      <td colspan="5" style="font-size:115%;font-weight:bold;">Alle {{len .}} Einträge</td>
+    </tr>
       <tr>
-        <td>Alle {{len .}} Einträge</td>
-        <td>Einheit</td>
-        <td>Kategorie</td>
-        <td>Gew.</td>
-        <td>Vol.</td>
+        <th>Name</th>
+        <th>Einheit</th>
+        <th>Kategorie</th>
+        <th>Gew.</th>
+        <th>Vol.</th>
       </tr>
     {{range $i,$e := . }}
       <tr>
@@ -24,11 +27,10 @@
         <td>{{$e.Category}}</td>
         <td class="number">{{$e.Weight}}</td>
         <td class="number">{{$e.Volume}}</td>
-        <td><a href="/edit/?item={{$i}}"><button>✍︎</button></a></td>
+        <td><a href="/edit/?item={{$i}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
       </tr>
     {{end}}
 </table>
-
-<a href="/">Einkaufszettel</a>
+<p><a href="/">Einkaufszettel</a></p>
 </body>
 </html>

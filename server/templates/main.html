@@ -13,27 +13,40 @@
 <table>
     <tr>
       <td colspan="4" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
-      <td><button onclick="showPopUpById('addItem')">✚</button></td>
+      <td><img class="normal" onclick="showPopUpById('addItem')" src="/assets/add.svg" title="Artikel hinzufügen"></td>
     </tr>
     {{$lastCat := ""}}
     {{range $i,$e := .Items }}
       {{if gt $e.QuantityRequired 0.0}}
       {{if not (eq $e.Category $lastCat) }}
-      <tr><td colspan="5" style="font-weight:bold;">{{$e.Category}}</td></tr>
+      <tr><th colspan="5">{{$e.Category}}</th></tr>
       {{end}}
       <tr>
-        <td><a href="/?del={{$i}}"><button title="Entfernen">✗</button></a></td>
-        <td>{{$e.Name}}</td>
-        <td class="number" onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
-        <td>{{$e.Unit}}</td>
-        <td><a href="/?shopped={{$i}}"><button title="Gekauft">✔</button></a></td>
+        <td {{if $e.Basket}}class="basket"{{end}}><a href="/?del={{$i}}"><img class="list" src="/assets/delete.svg" title="Entfernen"></a></td>
+        <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
+        <td {{if $e.Basket}}class="numberBasket"{{else}}class="number"{{end}} onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
+        <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Unit}}</td>
+        <td {{if $e.Basket}}class="basket"{{end}}><a href="/?shopped={{$i}}"><img class="list" src="/assets/sCar.svg"></a></td>
       </tr>
       {{$lastCat = $e.Category}}
       {{end}}
     {{end}}
+
+    <tr>
+    {{$total := .Items.Total}}
+    <td style="padding-top: 1em; padding-bottom: 1em;" colspan="5">Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</td>
+    </tr>
+
+    <tr>
+    <td colspan="4"></td><td><img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt"></td>
+    </tr>
 </table>
-{{$total := .Items.Total}}
-<p>Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</p>
+
+<div id="payed" class="addItem">
+Wirklich alle grünen Artikel gekauft?<br><br>
+<button onclick="hidePopUp()" title="Bezahlt">Abbrechen</button>
+<a href="/?shopped=payed"><button title="Bezahlt">Gekauft</button></a>
+</div>
 
 <div id="addItem" class="addItem">
 <form action="/" method="post">
