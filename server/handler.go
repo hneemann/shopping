@@ -60,6 +60,8 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 					(*data).Delete(id)
 				case "set":
 					(*data).SetQuantity(id, toInt(query.Get("q")))
+				case "add":
+					(*data).AddToQuantity(id, toInt(query.Get("q")))
 				}
 			}
 		} else {

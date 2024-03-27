@@ -130,6 +130,18 @@ func (items Items) SetQuantity(id, q int) {
 	i.Basket = false
 }
 
+func (items Items) AddToQuantity(id, q int) {
+	if id < 0 || id >= len(items) {
+		return
+	}
+	i := items[id]
+	i.QuantityRequired += float64(q)
+	if i.QuantityRequired < 0 {
+		i.QuantityRequired = 0
+	}
+	i.Basket = false
+}
+
 func (items Items) ModQuantity(id, n int) float64 {
 	if id < 0 || id >= len(items) {
 		return 0

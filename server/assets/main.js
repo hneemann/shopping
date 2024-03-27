@@ -15,7 +15,7 @@ function modifyQuantity() {
 function addItem() {
     let id = document.getElementById('addItemItem').value;
     let q = document.getElementById('addItemQuantity').value;
-    updateTable("id=" + id + "&mode=set&q=" + q)
+    updateTable("id=" + id + "&mode=add&q=" + q)
 }
 
 function catChanged() {
