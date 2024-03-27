@@ -233,6 +233,29 @@ func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http
 	}
 }
 
+func LogoutHandler[S any](sc *sessionCache[S], logoutTemp *template.Template) http.HandlerFunc {
+	if logoutTemp == nil {
+		panic("logout template is nil")
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if c, err := r.Cookie("id"); err == nil {
+			id := c.Value
+			if se := sc.getSession(id); se != nil {
+				se.mutex.Lock()
+				defer se.mutex.Unlock()
+				sc.sm.PersistData(se.user, se.data)
+				delete(sc.sessions, id)
+			}
+			http.SetCookie(w, &http.Cookie{Value: "", Name: "id", Expires: time.Now().Add(-time.Hour)})
+		}
+		err := logoutTemp.Execute(w, nil)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
 // RegisterHandler is a handler that handles the registration.
 // The given template is used to render the registration page.
 // It needs to contain a form with the fields username, password and password2.

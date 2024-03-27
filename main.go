@@ -124,6 +124,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/login", session.LoginHandler(sc, server.Templates.Lookup("login.html")))
+	mux.HandleFunc("/logout", session.LogoutHandler(sc, server.Templates.Lookup("logout.html")))
 	mux.HandleFunc("/register", session.RegisterHandler(sc, server.Templates.Lookup("register.html")))
 	mux.HandleFunc("/", session.CheckSessionFunc(sc, server.MainHandler))
 	mux.HandleFunc("/table/", session.CheckSessionRest(sc, http.HandlerFunc(server.TableHandler)))
