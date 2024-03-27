@@ -4,12 +4,40 @@
         font-family: Arial, sans-serif;
         font-size: 250%;
     }
+
+    table.mainTable {
+        margin: 0.5em;
+        border-collapse: collapse;
+        width: calc( 100% - 1em);
+    }
+
+    td.name {
+        width: 100%;
+    }
+
+    td.nameBasket {
+        width: 100%;
+        text-decoration-line: line-through;
+        text-decoration-thickness: 15%;
+    }
 }
 
 @media (pointer: fine) {
     body {
         font-family: Arial, sans-serif;
         font-size: 150%;
+    }
+
+    table.mainTable {
+        border-collapse: collapse;
+    }
+
+    td.name {
+    }
+
+    td.nameBasket {
+        text-decoration-line: line-through;
+        text-decoration-thickness: 15%;
     }
 }
 
@@ -49,11 +77,6 @@ td.number {
     text-align: right;
 }
 
-td.basket {
-    text-decoration-line: line-through;
-    text-decoration-thickness: 15%;
-}
-
 div.addItem {
     border-style: solid;
     border-color: darkgray;
@@ -66,9 +89,5 @@ div.addItem {
     width: 20em;
     margin-left: -10em;
     z-index: 5;
-}
-
-table {
-    border-collapse: collapse;
 }
 

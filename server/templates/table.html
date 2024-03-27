@@ -13,7 +13,7 @@
           {{end}}
           <tr>
             <td><img id="del_{{$i}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="updateItem({{$i}},'del')"></td>
-            <td {{if $e.Basket}}class="basket"{{end}}>{{$e.Name}}</td>
+            <td {{if $e.Basket}}class="nameBasket"{{else}}class="name"{{end}}>{{$e.Name}}</td>
             <td class="number" onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}})">{{$e.QuantityRequired}}</td>
             <td>{{$e.Unit}}</td>
             <td><img id="car_{{$i}}" class="list" src="/assets/sCar.svg" onclick="updateItem({{$i}},'car')"></td>
