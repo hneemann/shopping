@@ -42,6 +42,10 @@
     }
 }
 
+td.car {
+    text-align: center;
+}
+
 img.list {
     width: 1.2em;
     position: relative;

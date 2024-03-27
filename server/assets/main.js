@@ -38,7 +38,11 @@ function updateItem(id, mode) {
 function updateTable(query) {
     fetch("/table/?" + query)
         .then(function (response) {
-            return response.text()
+            if (response.status !== 200) {
+                window.location.reload();
+                return;
+            }
+            return response.text();
         })
         .then(function (html) {
             let table = document.getElementById('table');
