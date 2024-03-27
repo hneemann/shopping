@@ -12,13 +12,20 @@ import (
 )
 
 type Manager[D any] interface {
+	// CreateUser is called in a new user needs to be created
 	CreateUser(user string, pass string) (*D, error)
+	// CheckPassword is called to check if the password is correct
 	CheckPassword(user string, pass string) bool
+	// RestoreData is called to restore the data for a user
+	// In most cases this will mean to load a file or similar
 	RestoreData(user string, pass string) (*D, error)
+	// PersistData is called to save the data for a user
+	// In most cases this will mean to write a file or similar
 	PersistData(user string, data *D)
 }
 
 type sessionCacheEntry[D any] struct {
+	mutex      sync.Mutex
 	lastAccess time.Time
 	user       string
 	data       *D
@@ -32,19 +39,20 @@ type sessionCache[D any] struct {
 	shutDown chan struct{}
 }
 
-func NewSessionCache[S any](sm Manager[S], lifeTime time.Duration) *sessionCache[S] {
+// NewSessionCache creates a new session cache
+func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *sessionCache[S] {
 	shutDown := make(chan struct{})
 	sc := sessionCache[S]{
 		sessions: make(map[string]*sessionCacheEntry[S]),
 		sm:       sm,
 		shutDown: shutDown,
-		lifeTime: lifeTime,
+		lifeTime: sessionLifeTime,
 	}
 
 	go func() {
 		for {
 			select {
-			case <-time.After(lifeTime):
+			case <-time.After(sessionLifeTime):
 				sc.checkSessions()
 			case <-shutDown:
 				return
@@ -55,20 +63,18 @@ func NewSessionCache[S any](sm Manager[S], lifeTime time.Duration) *sessionCache
 	return &sc
 }
 
-func (s *sessionCache[S]) getSession(id string) *S {
+func (s *sessionCache[S]) getSession(id string) *sessionCacheEntry[S] {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	if sce, ok := s.sessions[id]; ok {
 		if time.Since(sce.lastAccess) < s.lifeTime {
-			sce.lastAccess = time.Now()
-			return sce.data
+			return sce
 		} else {
 			s.sm.PersistData(sce.user, sce.data)
 			delete(s.sessions, id)
 		}
 	}
-
 	return nil
 }
 
@@ -151,6 +157,21 @@ func (s *sessionCache[S]) Close() {
 	s.sm = nil
 }
 
+func (s *sessionCache[D]) doHandler(w http.ResponseWriter, r *http.Request, parent http.Handler) bool {
+	if c, err := r.Cookie("id"); err == nil {
+		id := c.Value
+		if se := s.getSession(id); se != nil {
+			se.mutex.Lock()
+			defer se.mutex.Unlock()
+			se.lastAccess = time.Now()
+			nc := context.WithValue(r.Context(), "data", se.data)
+			parent.ServeHTTP(w, r.WithContext(nc))
+			return true
+		}
+	}
+	return false
+}
+
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 func createRandomString() string {
@@ -161,38 +182,32 @@ func createRandomString() string {
 	return string(b)
 }
 
+// CheckSessionFunc is a wrapper that redirects to /login if no valid session id is found
 func CheckSessionFunc[S any](sc *sessionCache[S], parent http.HandlerFunc) http.HandlerFunc {
 	return CheckSession(sc, parent)
 }
 
+// CheckSession is a wrapper that redirects to /login if no valid session id is found
 func CheckSession[S any](sc *sessionCache[S], parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if c, err := r.Cookie("id"); err == nil {
-			id := c.Value
-			if s := sc.getSession(id); s != nil {
-				nc := context.WithValue(r.Context(), "data", s)
-				parent.ServeHTTP(w, r.WithContext(nc))
-				return
-			}
+		if ok := sc.doHandler(w, r, parent); !ok {
+			http.Redirect(w, r, "/login", http.StatusFound)
 		}
-		http.Redirect(w, r, "/login", http.StatusFound)
 	}
 }
 
+// CheckSessionRest is a wrapper that returns a 403 Forbidden if no valid session id is found
 func CheckSessionRest[S any](sc *sessionCache[S], parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if c, err := r.Cookie("id"); err == nil {
-			id := c.Value
-			if s := sc.getSession(id); s != nil {
-				nc := context.WithValue(r.Context(), "data", s)
-				parent.ServeHTTP(w, r.WithContext(nc))
-				return
-			}
+		if ok := sc.doHandler(w, r, parent); !ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
 		}
-		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 }
 
+// LoginHandler is a handler that handles the login.
+// The given template is used to render the login page.
+// It needs to contain a form with the fields username and password.
 func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http.HandlerFunc {
 	if loginTemp == nil {
 		panic("login template is nil")
@@ -218,6 +233,9 @@ func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http
 	}
 }
 
+// RegisterHandler is a handler that handles the registration.
+// The given template is used to render the registration page.
+// It needs to contain a form with the fields username, password and password2.
 func RegisterHandler[S any](sc *sessionCache[S], registerTemp *template.Template) http.HandlerFunc {
 	if registerTemp == nil {
 		panic("register template is nil")
