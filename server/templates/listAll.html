@@ -11,8 +11,7 @@
 
 <table>
     <tr>
-      <td colspan="8" style="font-size:115%;font-weight:bold;">Alle {{len .}} Einträge</td>
-      <td><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a></td>
+      <td colspan="6" style="font-size:115%;font-weight:bold;"><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a> Alle {{len .}} Einträge</td>
     </tr>
       <tr>
         <th>Name</th>
@@ -21,20 +20,20 @@
         <th></th>
         <th>Einheit</th>
         <th>Kategorie</th>
-        <th>Gew.</th>
-        <th>Vol.</th>
+        <th class="pcOnly">Gew.</th>
+        <th class="pcOnly">Vol.</th>
       </tr>
     {{range $i,$e := . }}
       <tr>
         <td>{{$e.Name}}</td>
         <td><img class="list" onclick="modify({{$i}},-1)" src="/assets/sub.svg"></td>
-        <td id="q{{$i}}">{{$e.QuantityRequired}}</td>
+        <td class="number" id="q{{$i}}">{{$e.QuantityRequired}}</td>
         <td><img class="list" onclick="modify({{$i}},1)" src="/assets/add.svg"></td>
         <td>{{$e.Unit}}</td>
         <td>{{$e.Category}}</td>
-        <td class="number">{{$e.Weight}}</td>
-        <td class="number">{{$e.Volume}}</td>
-        <td><a href="/edit/?item={{$i}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
+        <td class="number pcOnly">{{$e.Weight}}</td>
+        <td class="number pcOnly">{{$e.Volume}}</td>
+        <td class="pcOnly"><a href="/edit/?item={{$i}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
       </tr>
     {{end}}
 </table>
