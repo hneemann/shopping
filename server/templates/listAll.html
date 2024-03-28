@@ -11,30 +11,24 @@
 
 <table>
     <tr>
-      <td colspan="6" style="font-size:115%;font-weight:bold;"><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a> Alle {{len .}} Einträge</td>
+      <td colspan="5" style="font-size:115%;font-weight:bold;"><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a> Alle {{len .}} Artikel</td>
     </tr>
-      <tr>
-        <th>Name</th>
-        <th></th>
-        <th>N</th>
-        <th></th>
-        <th>Einheit</th>
-        <th>Kategorie</th>
-        <th class="pcOnly">Gew.</th>
-        <th class="pcOnly">Vol.</th>
-      </tr>
+    {{$lastCat := ""}}
     {{range $i,$e := . }}
+      {{if not (eq $e.Category $lastCat) }}
+      <tr><th colspan="5">{{$e.Category}}</th></tr>
+      {{end}}
       <tr>
         <td>{{$e.Name}}</td>
         <td><img class="list" onclick="modify({{$i}},-1)" src="/assets/sub.svg"></td>
-        <td class="number" id="q{{$i}}">{{$e.QuantityRequired}}</td>
+        <td class="number" id="q{{$i}}">{{if $e.QuantityRequired}}{{$e.QuantityRequired}}{{else}}-{{end}}</td>
         <td><img class="list" onclick="modify({{$i}},1)" src="/assets/add.svg"></td>
         <td>{{$e.Unit}}</td>
-        <td>{{$e.Category}}</td>
-        <td class="number pcOnly">{{$e.Weight}}</td>
-        <td class="number pcOnly">{{$e.Volume}}</td>
+        <td class="number pcOnly" title="Gewicht in g">{{$e.Weight}}</td>
+        <td class="number pcOnly" title="Volumen in ml">{{$e.Volume}}</td>
         <td class="pcOnly"><a href="/edit/?item={{$i}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
       </tr>
+      {{$lastCat = $e.Category}}
     {{end}}
 </table>
 </body>
