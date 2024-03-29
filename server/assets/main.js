@@ -28,6 +28,7 @@ function catChanged() {
         }
     }
     document.getElementById('addItemItem').innerHTML = found;
+    document.getElementById('addItemLink').href = "/add?c="+category;
 }
 
 function updateItem(id, mode) {

@@ -75,7 +75,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
   <datalist id="items">
     {{range $i,$e := .Items }}<option id="{{$e.Category}}" value="{{$e.Name}}">{{$e.Name}}</option>{{end}}
   </datalist>
-  <a href="/add">Neu</a>
+  <a id="addItemLink" href="/add">Neu</a>
 </div>
 
 <div id="setQuantity" class="addItem">

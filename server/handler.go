@@ -184,6 +184,7 @@ type addData struct {
 	Name       string
 	Unit       string
 	Quantity   float64
+	Category   string
 	Weight     string
 	Volume     string
 	QHidden    bool
@@ -229,10 +230,16 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
+		} else {
+			category = r.URL.Query().Get("c")
+			if category == "" {
+				category = string(item.Categories[0])
+			}
 		}
 		err = addTemp.Execute(w, addData{
 			Name:       itemName,
 			Unit:       itemUnit,
+			Category:   category,
 			Quantity:   quantity,
 			Weight:     weightStr,
 			Volume:     volumeStr,

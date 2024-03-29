@@ -24,10 +24,11 @@
      <tr>
        <td><label for="category">Kategorie:</label></td>
        <td>
+         {{ $cat := .Category }}
          <select id="category" name="category">
-           {{range .Categories}}
-           <option value="{{.}}">{{.}}</option>
-           {{end}}
+           {{range .Categories -}}
+           <option value="{{.}}"{{if eq . $cat}} selected="selected"{{end}}>{{.}}</option>
+           {{- end}}
          </select>
        </td>
      </tr>
@@ -51,9 +52,10 @@
   {{if .Error}}
     <p class="error">{{.Error}}</p>
   {{end}}
-
+  <p>
   <a href="/"><button type="button">Abbrechen</button></a>
   <input type="submit" value="Hinzufügen">
+  </p>
   {{if .QHidden}}
   <input type="hidden" name="quantity" value="{{.Quantity}}"/>
   {{end}}

@@ -48,8 +48,10 @@
     <p class="error">{{.Error}}</p>
   {{end}}
 
+  <p>
   <a href="/listAll"><button type="button">Abbrechen</button></a>
   <input type="submit" value="Ändern"/>
+  </p>
   <input type="hidden" name="id" value="{{.Id}}"/>
 </form>
 
@@ -58,7 +60,7 @@
 Gefahrenzone!
 </p>
 <p>
-  <button type="button" onclick="showPopUpById('delete')">Löschen</button>
+  <button type="button" onclick="showPopUpById('delete')" title="Artikel komplett entfernen">Löschen</button>
 </p>
 </div>
 
