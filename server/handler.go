@@ -164,6 +164,10 @@ func fromBool(b bool) float64 {
 }
 
 func toIntCalc(str string) (int, string, error) {
+	if str == "" {
+		return 0, "", nil
+	}
+
 	f, err := simpleParser.Generate(str)
 	const format = "Fehler im Ausdruck '%s': %w"
 	if err != nil {
