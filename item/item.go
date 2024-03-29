@@ -125,9 +125,7 @@ func (items Items) SetQuantity(id, q int) {
 	if q < 0 {
 		q = 0
 	}
-	i := items[id]
-	i.QuantityRequired = float64(q)
-	i.Basket = false
+	items[id].SetQuantity(float64(q))
 }
 
 func (items Items) AddToQuantity(id, q int) {
@@ -193,32 +191,29 @@ type Item struct {
 	Basket           bool
 	Unit             string
 	Weight           int
+	WeightStr        string
 	Volume           int
+	VolumeStr        string
 	Category         Category
 	ShopHistory      []HistoryEntry
 	OutlookState     OutlookState
 }
 
-func New(name string, unit string, weight int, volume int, category Category) *Item {
+func New(name string, unit string, weight int, weightStr string, volume int, volumeStr string, category Category) *Item {
 	return &Item{
-		Name:     name,
-		Category: category,
-		Unit:     unit,
-		Weight:   weight,
-		Volume:   volume,
+		Name:      name,
+		Category:  category,
+		Unit:      unit,
+		Weight:    weight,
+		WeightStr: weightStr,
+		Volume:    volume,
+		VolumeStr: volumeStr,
 	}
 }
 
-func (i *Item) SetRequired(quantity float64) {
+func (i *Item) SetQuantity(quantity float64) {
 	i.QuantityRequired = quantity
-}
-
-func (i *Item) Shopped() {
-	i.ShopHistory = append(i.ShopHistory, HistoryEntry{
-		ShopTime: time.Now(),
-		Quantity: i.QuantityRequired,
-	})
-	i.QuantityRequired = 0
+	i.Basket = false
 }
 
 func (i *Item) Less(other *Item, cat func(Category) int) bool {

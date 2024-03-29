@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<p>Lebensmittel</p>
+<p>Artikel bearbeiten</p>
 
 <form action="/edit/" method="post">
   <table>
@@ -34,19 +34,39 @@
      </tr>
      <tr>
        <td><label for="weight">Gewicht:</label></td>
-       <td><input class="value" type="number" id="weight" name="weight" placeholder="Gewicht in g" value="{{.Item.Weight}}"/></td>
+       <td><input class="value" id="weight" name="weight" placeholder="Gewicht in g" value="{{.Item.WeightStr}}"/></td>
        <td>g</td>
      </tr>
      <tr>
        <td><label for="volume">Volumen:</label></td>
-       <td><input class="value" type="number" id="volume" name="volume" placeholder="Volumen in ml" value="{{.Item.Volume}}"/></td>
+       <td><input class="value" id="volume" name="volume" placeholder="Volumen in ml" value="{{.Item.VolumeStr}}"/></td>
        <td>ml</td>
      </tr>
   </table>
+
+  {{if .Error}}
+    <p class="error">{{.Error}}</p>
+  {{end}}
+
   <a href="/listAll"><button type="button">Abbrechen</button></a>
   <input type="submit" value="Ändern"/>
   <input type="hidden" name="id" value="{{.Id}}"/>
 </form>
+
+<div style="color:red;border:1px solid red;margin:0.5em;padding-left:1em;;padding-right:1em;">
+<p>
+Gefahrenzone!
+</p>
+<p>
+  <button type="button" onclick="showPopUpById('delete')">Löschen</button>
+</p>
+</div>
+
+<div id="delete" class="addItem">
+Wirklich '{{.Item.Name}}' unwiederbringlich löschen?<br><br>
+ <button onclick="hidePopUp();">Abbrechen</button>
+ <a href="/listAll?del={{.Id}}"><button type="button">Löschen</button></a>
+</div>
 
 </body>
 </html>

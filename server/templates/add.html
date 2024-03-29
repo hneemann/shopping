@@ -19,7 +19,7 @@
      </tr>
      <tr>
        <td><label for="unit">Einheit:</label></td>
-       <td><input class="value" type="text" id="unit" name="unit" placeholder="Einheit z.B. 'Dose'"/></td>
+       <td><input class="value" type="text" id="unit" name="unit" placeholder="Einheit z.B. 'Dose'" value="{{.Unit}}"/></td>
      </tr>
      <tr>
        <td><label for="category">Kategorie:</label></td>
@@ -39,15 +39,19 @@
      {{end}}
      <tr>
        <td><label for="weight">Gewicht:</label></td>
-       <td><input class="value" type="number" id="weight" name="weight" placeholder="Gewicht in g"/></td>
+       <td><input class="value" id="weight" name="weight" placeholder="Gewicht in g" value="{{.Weight}}"/></td>
        <td>g</td>
      </tr>
      <tr>
        <td><label for="volume">Volumen:</label></td>
-       <td><input class="value" type="number" id="volume" name="volume" placeholder="Volumen in ml"/></td>
+       <td><input class="value" id="volume" name="volume" placeholder="Volumen in ml" value="{{.Volume}}"/></td>
        <td>ml</td>
      </tr>
   </table>
+  {{if .Error}}
+    <p class="error">{{.Error}}</p>
+  {{end}}
+
   <a href="/"><button type="button">Abbrechen</button></a>
   <input type="submit" value="Hinzufügen">
   {{if .QHidden}}

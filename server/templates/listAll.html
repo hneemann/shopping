@@ -11,7 +11,8 @@
 
 <table>
     <tr>
-      <td colspan="5" style="font-size:115%;font-weight:bold;"><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a> Alle {{len .}} Artikel</td>
+      <td colspan="7" style="font-size:115%;font-weight:bold;">Alle {{len .}} Artikel</td>
+      <td><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a></td>
     </tr>
     {{$lastCat := ""}}
     {{range $i,$e := . }}
@@ -26,7 +27,7 @@
         <td>{{$e.Unit}}</td>
         <td class="number pcOnly" title="Gewicht in g">{{$e.Weight}}</td>
         <td class="number pcOnly" title="Volumen in ml">{{$e.Volume}}</td>
-        <td class="pcOnly"><a href="/edit/?item={{$i}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
+        <td><a href="/edit/?item={{$i}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
       </tr>
       {{$lastCat = $e.Category}}
     {{end}}

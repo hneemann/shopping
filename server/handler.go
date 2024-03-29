@@ -3,9 +3,12 @@ package server
 import (
 	"embed"
 	"fmt"
+	"github.com/hneemann/parser2"
+	"github.com/hneemann/parser2/funcGen"
 	"github.com/hneemann/shopping/item"
 	"html/template"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -123,59 +126,134 @@ func toInt(str string) int {
 	return f
 }
 
+var simpleParser = funcGen.New[float64]().
+	AddConstant("pi", math.Pi).
+	AddSimpleOp("=", true, func(a, b float64) (float64, error) { return fromBool(a == b), nil }).
+	AddSimpleOp("<", false, func(a, b float64) (float64, error) { return fromBool(a < b), nil }).
+	AddSimpleOp(">", false, func(a, b float64) (float64, error) { return fromBool(a > b), nil }).
+	AddSimpleOp("+", true, func(a, b float64) (float64, error) { return a + b, nil }).
+	AddSimpleOp("-", false, func(a, b float64) (float64, error) { return a - b, nil }).
+	AddSimpleOp("*", true, func(a, b float64) (float64, error) { return a * b, nil }).
+	AddSimpleOp("/", false, func(a, b float64) (float64, error) { return a / b, nil }).
+	AddSimpleOp("^", false, func(a, b float64) (float64, error) { return math.Pow(a, b), nil }).
+	AddUnary("-", func(a float64) (float64, error) { return -a, nil }).
+	AddSimpleFunction("sin", math.Sin).
+	AddSimpleFunction("cos", math.Cos).
+	AddSimpleFunction("tan", math.Tan).
+	AddSimpleFunction("exp", math.Exp).
+	AddSimpleFunction("ln", math.Log).
+	AddSimpleFunction("sqrt", math.Sqrt).
+	AddSimpleFunction("sqr", func(x float64) float64 {
+		return x * x
+	}).
+	SetToBool(func(c float64) (bool, bool) { return c != 0, true }).
+	SetNumberParser(
+		parser2.NumberParserFunc[float64](
+			func(n string) (float64, error) {
+				return strconv.ParseFloat(n, 64)
+			},
+		),
+	)
+
+func fromBool(b bool) float64 {
+	if b {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+func toIntCalc(str string) (int, string, error) {
+	f, err := simpleParser.Generate(str)
+	const format = "Fehler im Ausdruck '%s': %w"
+	if err != nil {
+		return 0, str, fmt.Errorf(format, str, err)
+	}
+	res, err := f.Eval()
+	if err != nil {
+		return 0, str, fmt.Errorf(format, str, err)
+	}
+	return int(res), str, nil
+}
+
 type addData struct {
 	Name       string
+	Unit       string
 	Quantity   float64
+	Weight     string
+	Volume     string
 	QHidden    bool
 	Categories []item.Category
+	Error      error
 }
 
 func AddHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
+		var itemName, itemUnit, category string
+		var quantity float64 = 1
+		var volumeStr string
+		var weightStr string
+		var err error
 		if r.Method == http.MethodPost {
-			itemName := r.FormValue("name")
-			itemUnit := r.FormValue("unit")
-			category := r.FormValue("category")
-			quantity := toFloat(r.FormValue("quantity"))
-			weight := toInt(r.FormValue("weight"))
-			volume := toInt(r.FormValue("volume"))
-
-			if len(itemName) > 0 {
-				found := false
-				for _, e := range *data {
-					if e.Name == itemName {
-						e.SetRequired(quantity)
-						found = true
-						break
+			itemName = r.FormValue("name")
+			itemUnit = r.FormValue("unit")
+			category = r.FormValue("category")
+			quantity = toFloat(r.FormValue("quantity"))
+			var weight int
+			weight, weightStr, err = toIntCalc(r.FormValue("weight"))
+			if err == nil {
+				var volume int
+				volume, volumeStr, err = toIntCalc(r.FormValue("volume"))
+				if err == nil {
+					if len(itemName) > 0 {
+						found := false
+						for _, e := range *data {
+							if e.Name == itemName {
+								e.SetQuantity(quantity)
+								found = true
+								break
+							}
+						}
+						if !found {
+							i := item.New(itemName, itemUnit, weight, weightStr, volume, volumeStr, item.Category(category))
+							i.SetQuantity(quantity)
+							*data = append(*data, i)
+							(*data).Order(item.REWE)
+						}
+						http.Redirect(w, r, "/", http.StatusFound)
+						return
 					}
 				}
-				if !found {
-					i := item.New(itemName, itemUnit, weight, volume, item.Category(category))
-					i.SetRequired(quantity)
-					*data = append(*data, i)
-					(*data).Order(item.REWE)
-				}
 			}
-		} else {
-			err := addTemp.Execute(w, addData{
-				Name:       "",
-				Quantity:   1,
-				QHidden:    false,
-				Categories: item.Categories,
-			})
-			if err != nil {
-				log.Println(err)
-			}
-			return
 		}
+		err = addTemp.Execute(w, addData{
+			Name:       itemName,
+			Unit:       itemUnit,
+			Quantity:   quantity,
+			Weight:     weightStr,
+			Volume:     volumeStr,
+			QHidden:    false,
+			Categories: item.Categories,
+			Error:      err,
+		})
+		if err != nil {
+			log.Println(err)
+		}
+		return
 	}
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 var listAllTemp = Templates.Lookup("listAll.html")
 
 func ListAllHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
+		idStr := r.URL.Query().Get("del")
+		if idStr != "" {
+			id, idErr := strconv.Atoi(idStr)
+			if idErr == nil || id >= 0 || id < len(*data) {
+				(*data) = append((*data)[:id], (*data)[id+1:]...)
+			}
+		}
 		err := listAllTemp.Execute(w, data)
 		if err != nil {
 			log.Println(err)
@@ -187,50 +265,66 @@ var editTemp = Templates.Lookup("edit.html")
 
 func EditHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
+		var err error
+		var id int
+		var itemToEdit *item.Item
 		if r.Method == http.MethodPost {
-			itemName := r.FormValue("name")
-			itemUnit := r.FormValue("unit")
-			category := r.FormValue("category")
-			weight := toInt(r.FormValue("weight"))
-			volume := toInt(r.FormValue("volume"))
 			idStr := r.FormValue("id")
-
-			id, err := strconv.Atoi(idStr)
-			if err == nil || id >= 0 || id < len(*data) {
-				it := (*data)[id]
-				it.Name = itemName
-				it.Unit = itemUnit
-				it.Category = item.Category(category)
-				it.Weight = weight
-				it.Volume = volume
-			}
-
-			(*data).Order(item.REWE)
-
-			http.Redirect(w, r, "/listAll", http.StatusFound)
-			return
-		} else {
-			itemStr := r.URL.Query().Get("item")
-			itemId, err := strconv.Atoi(itemStr)
-			if err != nil || itemId < 0 || itemId >= len(*data) {
+			var idErr error
+			id, idErr = strconv.Atoi(idStr)
+			if idErr != nil || id < 0 || id >= len(*data) {
 				http.Redirect(w, r, "/listAll", http.StatusFound)
 				return
 			}
 
-			var d = struct {
-				Item       *item.Item
-				Id         int
-				Categories []item.Category
-			}{
-				Item:       (*data)[itemId],
-				Id:         itemId,
-				Categories: item.Categories,
+			itemToEdit = &item.Item{
+				Name:     r.FormValue("name"),
+				Unit:     r.FormValue("unit"),
+				Category: item.Category(r.FormValue("category")),
 			}
 
-			err = editTemp.Execute(w, d)
-			if err != nil {
-				log.Println(err)
+			itemToEdit.Weight, itemToEdit.WeightStr, err = toIntCalc(r.FormValue("weight"))
+			if err == nil {
+				itemToEdit.Volume, itemToEdit.VolumeStr, err = toIntCalc(r.FormValue("volume"))
+				if err == nil {
+					(*data)[id] = itemToEdit
+					(*data).Order(item.REWE)
+					http.Redirect(w, r, "/listAll", http.StatusFound)
+					return
+				}
 			}
+		} else {
+			idStr := r.URL.Query().Get("item")
+			var idErr error
+			id, idErr = strconv.Atoi(idStr)
+			if idErr != nil || id < 0 || id >= len(*data) {
+				http.Redirect(w, r, "/listAll", http.StatusFound)
+				return
+			}
+			itemToEdit = (*data)[id]
+		}
+
+		if itemToEdit.WeightStr == "" && itemToEdit.Weight > 0 {
+			itemToEdit.WeightStr = strconv.Itoa(itemToEdit.Weight)
+		}
+		if itemToEdit.VolumeStr == "" && itemToEdit.Volume > 0 {
+			itemToEdit.VolumeStr = strconv.Itoa(itemToEdit.Volume)
+		}
+		var d = struct {
+			Item       *item.Item
+			Id         int
+			Categories []item.Category
+			Error      error
+		}{
+			Item:       itemToEdit,
+			Id:         id,
+			Categories: item.Categories,
+			Error:      err,
+		}
+
+		err = editTemp.Execute(w, d)
+		if err != nil {
+			log.Println(err)
 		}
 	}
 }

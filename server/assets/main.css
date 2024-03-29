@@ -51,6 +51,10 @@
     }
 }
 
+.error {
+    color: red;
+}
+
 td.car {
     text-align: center;
 }
