@@ -24,11 +24,24 @@ function catChanged() {
     let found = "";
     for (var i = 0; i < items.length; i++) {
         if (items[i].id === category) {
-            found+='<option value="' + i + '">' + items[i].value + '</option>'
+            found += '<option value="' + i + '">' + items[i].value + '</option>'
         }
     }
     document.getElementById('addItemItem').innerHTML = found;
-    document.getElementById('addItemLink').href = "/add?c="+category;
+    document.getElementById('addItemLink').href = "/add?c=" + category;
+}
+
+let itemToDelete = -1;
+
+function deleteItemRequest(id, name) {
+    itemToDelete = id;
+    document.getElementById('deleteNotifyName').innerHTML = name;
+    showPopUpById('deleteNotify')
+}
+
+function deleteItem() {
+    hidePopUp()
+    updateItem(itemToDelete, 'del')
 }
 
 function updateItem(id, mode) {
