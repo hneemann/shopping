@@ -15,21 +15,21 @@
       <td><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a></td>
     </tr>
     {{$lastCat := ""}}
-    {{range $i,$e := . }}
-      {{if not (eq $e.Category $lastCat) }}
-      <tr><th colspan="5">{{$e.Category}}</th></tr>
+    {{range . }}
+      {{if not (eq .Category $lastCat) }}
+      <tr><th colspan="5">{{.Category}}</th></tr>
       {{end}}
       <tr>
-        <td>{{$e.Name}}</td>
-        <td><img class="list" onclick="modify({{$i}},-1)" src="/assets/sub.svg"></td>
-        <td class="number" id="q{{$i}}">{{if $e.QuantityRequired}}{{$e.QuantityRequired}}{{else}}-{{end}}</td>
-        <td><img class="list" onclick="modify({{$i}},1)" src="/assets/add.svg"></td>
-        <td>{{$e.Unit}}</td>
-        <td class="number pcOnly" title="Gewicht in g">{{$e.Weight}}</td>
-        <td class="number pcOnly" title="Volumen in ml">{{$e.Volume}}</td>
-        <td><a href="/edit/?item={{$i}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
+        <td>{{.Name}}</td>
+        <td><img class="list" onclick="modify({{.Id}},-1)" src="/assets/sub.svg"></td>
+        <td class="number" id="q{{.Id}}">{{if .QuantityRequired}}{{.QuantityRequired}}{{else}}-{{end}}</td>
+        <td><img class="list" onclick="modify({{.Id}},1)" src="/assets/add.svg"></td>
+        <td>{{.Unit}}</td>
+        <td class="number pcOnly" title="Gewicht in g">{{.Weight}}</td>
+        <td class="number pcOnly" title="Volumen in ml">{{.Volume}}</td>
+        <td><a href="/edit/?item={{.Id}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>
       </tr>
-      {{$lastCat = $e.Category}}
+      {{$lastCat = .Category}}
     {{end}}
 </table>
 </body>

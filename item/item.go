@@ -2,6 +2,7 @@ package item
 
 import (
 	"encoding/json"
+	"log"
 	"math"
 	"os"
 	"sort"
@@ -58,6 +59,57 @@ type Total struct {
 	Volume float64
 }
 
+func (items *Items) AddItem(item *Item) {
+	id := 0
+	for _, it := range *items {
+		if it.Id > id {
+			id = it.Id
+		}
+	}
+	item.Id = id + 1
+	*items = append(*items, item)
+	(*items).Order(REWE)
+}
+
+func (items *Items) DeleteItem(id int) {
+	index := -1
+	for i, item := range *items {
+		if item.Id == id {
+			index = i
+		}
+	}
+	if index >= 0 {
+		*items = append((*items)[:index], (*items)[index+1:]...)
+	}
+}
+
+func (items Items) IdValid(id int) bool {
+	for _, item := range items {
+		if item.Id == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (items *Items) ItemById(id int) *Item {
+	for _, item := range *items {
+		if item.Id == id {
+			return item
+		}
+	}
+	return nil
+}
+
+func (items Items) Replace(id int, edit *Item) {
+	for i, item := range items {
+		if item.Id == id {
+			edit.Id = item.Id
+			items[i] = edit
+		}
+	}
+}
+
 func (items Items) Total() Total {
 	weight := 0.0
 	volume := 0.0
@@ -86,12 +138,10 @@ func (items Items) Save(file string) error {
 }
 
 func (items Items) Shopped(id int) {
-	if id < 0 || id >= len(items) {
-		return
-	}
-	item := items[id]
-	if item.QuantityRequired > 0 {
-		item.Basket = !item.Basket
+	if item := items.ItemById(id); item != nil {
+		if item.QuantityRequired > 0 {
+			item.Basket = !item.Basket
+		}
 	}
 }
 
@@ -110,51 +160,45 @@ func (items Items) Payed() {
 }
 
 func (items Items) Delete(id int) {
-	if id < 0 || id >= len(items) {
-		return
+	if item := items.ItemById(id); item != nil {
+		item.QuantityRequired = 0
+		item.Basket = false
 	}
-	i := items[id]
-	i.QuantityRequired = 0
-	i.Basket = false
 }
 
 func (items Items) SetQuantity(id, q int) {
-	if id < 0 || id >= len(items) {
-		return
+	if item := items.ItemById(id); item != nil {
+		if q < 0 {
+			q = 0
+		}
+		item.SetQuantity(float64(q))
 	}
-	if q < 0 {
-		q = 0
-	}
-	items[id].SetQuantity(float64(q))
 }
 
 func (items Items) AddToQuantity(id, q int) {
-	if id < 0 || id >= len(items) {
-		return
+	if item := items.ItemById(id); item != nil {
+		item.QuantityRequired += float64(q)
+		if item.QuantityRequired < 0 {
+			item.QuantityRequired = 0
+		}
+		item.Basket = false
 	}
-	i := items[id]
-	i.QuantityRequired += float64(q)
-	if i.QuantityRequired < 0 {
-		i.QuantityRequired = 0
-	}
-	i.Basket = false
 }
 
 func (items Items) ModQuantity(id, n int) float64 {
-	if id < 0 || id >= len(items) {
-		return 0
+	if item := items.ItemById(id); item != nil {
+		if item.Weight == 1 {
+			item.QuantityRequired += float64(n) * 50
+		} else {
+			item.QuantityRequired += float64(n)
+		}
+		if item.QuantityRequired < 0 {
+			item.QuantityRequired = 0
+		}
+		item.Basket = false
+		return item.QuantityRequired
 	}
-	i := items[id]
-	if i.Weight == 1 {
-		i.QuantityRequired += float64(n) * 50
-	} else {
-		i.QuantityRequired += float64(n)
-	}
-	if i.QuantityRequired < 0 {
-		i.QuantityRequired = 0
-	}
-	i.Basket = false
-	return i.QuantityRequired
+	return 0
 }
 
 func (items Items) SomethingHidden() bool {
@@ -186,6 +230,7 @@ func (items Items) Order(c func(Category) int) {
 }
 
 type Item struct {
+	Id               int
 	Name             string
 	QuantityRequired float64
 	Basket           bool
@@ -257,6 +302,13 @@ func Load(file string) (*Items, error) {
 	err = json.NewDecoder(f).Decode(&items)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(items) > 0 && items[0].Id == 0 {
+		log.Println("create id's")
+		for i, item := range items {
+			item.Id = i + 1
+		}
 	}
 
 	return &items, nil

@@ -55,7 +55,7 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 		if idStr != "" {
 			id := toInt(idStr)
 			mode := query.Get("mode")
-			if id >= 0 && id < len(*data) {
+			if data.IdValid(id) {
 				switch mode {
 				case "car":
 					(*data).Shopped(id)
@@ -222,8 +222,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 						if !found {
 							i := item.New(itemName, itemUnit, weight, weightStr, volume, volumeStr, item.Category(category))
 							i.SetQuantity(quantity)
-							*data = append(*data, i)
-							(*data).Order(item.REWE)
+							data.AddItem(i)
 						}
 						http.Redirect(w, r, "/", http.StatusFound)
 						return
@@ -262,7 +261,7 @@ func ListAllHandler(w http.ResponseWriter, r *http.Request) {
 		if idStr != "" {
 			id, idErr := strconv.Atoi(idStr)
 			if idErr == nil || id >= 0 || id < len(*data) {
-				(*data) = append((*data)[:id], (*data)[id+1:]...)
+				data.DeleteItem(id)
 			}
 		}
 		err := listAllTemp.Execute(w, data)
@@ -283,7 +282,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			idStr := r.FormValue("id")
 			var idErr error
 			id, idErr = strconv.Atoi(idStr)
-			if idErr != nil || id < 0 || id >= len(*data) {
+			if idErr != nil || !data.IdValid(id) {
 				http.Redirect(w, r, "/listAll", http.StatusFound)
 				return
 			}
@@ -298,7 +297,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			if err == nil {
 				itemToEdit.Volume, itemToEdit.VolumeStr, err = toIntCalc(r.FormValue("volume"))
 				if err == nil {
-					(*data)[id] = itemToEdit
+					(*data).Replace(id, itemToEdit)
 					(*data).Order(item.REWE)
 					http.Redirect(w, r, "/listAll", http.StatusFound)
 					return
@@ -308,11 +307,11 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			idStr := r.URL.Query().Get("item")
 			var idErr error
 			id, idErr = strconv.Atoi(idStr)
-			if idErr != nil || id < 0 || id >= len(*data) {
+			if idErr != nil || !data.IdValid(id) {
 				http.Redirect(w, r, "/listAll", http.StatusFound)
 				return
 			}
-			itemToEdit = (*data)[id]
+			itemToEdit = data.ItemById(id)
 		}
 
 		if itemToEdit.WeightStr == "" && itemToEdit.Weight > 0 {

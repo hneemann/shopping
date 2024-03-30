@@ -42,7 +42,7 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
       <td>
       <select class="value" name="item" id="addItemItem">
         {{$cs := .CategorySelected}}
-        {{range $i,$e := .Items }}{{if eq $e.Category $cs }}<option value="{{$i}}">{{$e.Name}}</option>{{end}}{{end}}
+        {{range .Items }}{{if eq .Category $cs }}<option value="{{.Id}}">{{.Name}}</option>{{end}}{{end}}
       </select>
       </td>
     </tr>
@@ -79,7 +79,7 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
     </tr>
   </table>
   <datalist id="items">
-    {{range $i,$e := .Items }}<option id="{{$e.Category}}" value="{{$e.Name}}">{{$e.Name}}</option>{{end}}
+    {{range .Items }}<option data-cat="{{.Category}}" data-id="{{.Id}}" value="{{.Name}}">{{.Name}}</option>{{end}}
   </datalist>
   <a id="addItemLink" href="/add">Neu</a>
 </div>

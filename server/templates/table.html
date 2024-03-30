@@ -5,20 +5,20 @@
     </tr>
     {{$lastCat := ""}}
     {{$hide := .HideCart}}
-    {{range $i,$e := .Items }}
-      {{- if gt $e.QuantityRequired 0.0 -}}
-        {{- if not (and $hide $e.Basket) -}}
-          {{- if not (eq $e.Category $lastCat) -}}
-          <tr><th colspan="5">{{$e.Category}}</th></tr>
+    {{range .Items }}
+      {{- if gt .QuantityRequired 0.0 -}}
+        {{- if not (and $hide .Basket) -}}
+          {{- if not (eq .Category $lastCat) -}}
+          <tr><th colspan="5">{{.Category}}</th></tr>
           {{- end}}
           <tr>
-            <td><img id="del_{{$i}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="deleteItemRequest({{$i}}, '{{$e.Name}}');"></td>
-            <td {{if $e.Basket}}class="nameBasket"{{else}}class="name"{{end}}>{{$e.Name}}</td>
-            <td class="number" onclick="showSetQuantity('{{$e.Name}}', '{{$e.QuantityRequired}}',{{$i}});">{{$e.QuantityRequired}}</td>
-            <td>{{$e.Unit}}</td>
-            <td class="car"><img id="car_{{$i}}" class="list" src="/assets/sCar.svg" onclick="updateItem({{$i}},'car');"></td>
+            <td><img id="del_{{.Id}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="deleteItemRequest({{.Id}}, '{{.Name}}');"></td>
+            <td {{if .Basket}}class="nameBasket"{{else}}class="name"{{end}}>{{.Name}}</td>
+            <td class="number" onclick="showSetQuantity('{{.Name}}', '{{.QuantityRequired}}',{{.Id}});">{{.QuantityRequired}}</td>
+            <td>{{.Unit}}</td>
+            <td class="car"><img id="car_{{.Id}}" class="list" src="/assets/sCar.svg" onclick="updateItem({{.Id}},'car');"></td>
           </tr>
-          {{- $lastCat = $e.Category -}}
+          {{- $lastCat = .Category -}}
         {{- end -}}
       {{- end -}}
     {{end}}

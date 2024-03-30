@@ -23,8 +23,8 @@ function catChanged() {
     var items = document.getElementById('items').getElementsByTagName('option');
     let found = "";
     for (var i = 0; i < items.length; i++) {
-        if (items[i].id === category) {
-            found += '<option value="' + i + '">' + items[i].value + '</option>'
+        if (items[i].getAttribute("data-cat") === category) {
+            found += '<option value="' + items[i].getAttribute("data-id") + '">' + items[i].value + '</option>'
         }
     }
     document.getElementById('addItemItem').innerHTML = found;
