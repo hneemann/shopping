@@ -2,7 +2,6 @@ package item
 
 import (
 	"encoding/json"
-	"log"
 	"math"
 	"os"
 	"sort"
@@ -302,13 +301,6 @@ func Load(file string) (*Items, error) {
 	err = json.NewDecoder(f).Decode(&items)
 	if err != nil {
 		return nil, err
-	}
-
-	if len(items) > 0 && items[0].Id == 0 {
-		log.Println("create id's")
-		for i, item := range items {
-			item.Id = i + 1
-		}
 	}
 
 	return &items, nil
