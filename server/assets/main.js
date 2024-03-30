@@ -50,13 +50,18 @@ function updateItem(id, mode) {
 }
 
 function updateTable(query) {
-    fetch("/table/?" + query)
+    fetch("/table/?" + query, {
+        signal: AbortSignal.timeout(3000)
+    })
         .then(function (response) {
             if (response.status !== 200) {
                 window.location.reload();
                 return;
             }
             return response.text();
+        })
+        .catch(function (error) {
+            window.location.reload();
         })
         .then(function (html) {
             let table = document.getElementById('table');
