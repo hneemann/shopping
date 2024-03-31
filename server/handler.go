@@ -64,7 +64,7 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 				case "set":
 					(*data).SetQuantity(id, toInt(query.Get("q")))
 				case "add":
-					(*data).AddToQuantity(id, toInt(query.Get("q")))
+					(*data).ModQuantity(id, toInt(query.Get("q")), false)
 				}
 			}
 		} else {
@@ -92,8 +92,8 @@ func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
 		idStr := query.Get("id")
 		if idStr != "" {
 			id := toInt(idStr)
-			if id >= 0 && id < len(*data) {
-				q := (*data).ModQuantity(id, toInt(query.Get("n")))
+			if data.IdValid(id) {
+				q := (*data).ModQuantity(id, toInt(query.Get("n")), true)
 				w.Write([]byte(fmt.Sprintf("%1.0f", q)))
 				return
 			}
@@ -307,11 +307,15 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			idStr := r.URL.Query().Get("item")
 			var idErr error
 			id, idErr = strconv.Atoi(idStr)
-			if idErr != nil || !data.IdValid(id) {
+			if idErr != nil {
 				http.Redirect(w, r, "/listAll", http.StatusFound)
 				return
 			}
 			itemToEdit = data.ItemById(id)
+			if itemToEdit == nil {
+				http.Redirect(w, r, "/listAll", http.StatusFound)
+				return
+			}
 		}
 
 		if itemToEdit.WeightStr == "" && itemToEdit.Weight > 0 {

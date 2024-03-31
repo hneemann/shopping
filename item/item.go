@@ -2,6 +2,7 @@ package item
 
 import (
 	"encoding/json"
+	"log"
 	"math"
 	"os"
 	"sort"
@@ -78,6 +79,7 @@ func (items *Items) DeleteItem(id int) {
 		}
 	}
 	if index >= 0 {
+		log.Println("finally delete item", (*items)[index].Name)
 		*items = append((*items)[:index], (*items)[index+1:]...)
 	}
 }
@@ -140,11 +142,13 @@ func (items Items) Shopped(id int) {
 	if item := items.ItemById(id); item != nil {
 		if item.QuantityRequired > 0 {
 			item.Basket = !item.Basket
+			log.Println("in basket: ", item.Name, item.Basket)
 		}
 	}
 }
 
 func (items Items) Payed() {
+	log.Println("Payed")
 	ti := time.Now()
 	for _, item := range items {
 		if item.QuantityRequired > 0 && item.Basket {
@@ -160,6 +164,7 @@ func (items Items) Payed() {
 
 func (items Items) Delete(id int) {
 	if item := items.ItemById(id); item != nil {
+		log.Println("Delete", item.Name)
 		item.QuantityRequired = 0
 		item.Basket = false
 	}
@@ -174,24 +179,16 @@ func (items Items) SetQuantity(id, q int) {
 	}
 }
 
-func (items Items) AddToQuantity(id, q int) {
+func (items Items) ModQuantity(id, n int, increasedSpeed bool) float64 {
 	if item := items.ItemById(id); item != nil {
-		item.QuantityRequired += float64(q)
-		if item.QuantityRequired < 0 {
-			item.QuantityRequired = 0
-		}
-		item.Basket = false
-	}
-}
-
-func (items Items) ModQuantity(id, n int) float64 {
-	if item := items.ItemById(id); item != nil {
-		if item.Weight == 1 {
+		log.Println("mod quantity", item.Name, n)
+		if item.Weight == 1 && increasedSpeed {
 			item.QuantityRequired += float64(n) * 50
 		} else {
 			item.QuantityRequired += float64(n)
 		}
 		if item.QuantityRequired < 0 {
+			log.Println("negative quantity avoided", item.Name)
 			item.QuantityRequired = 0
 		}
 		item.Basket = false
@@ -256,6 +253,7 @@ func New(name string, unit string, weight int, weightStr string, volume int, vol
 }
 
 func (i *Item) SetQuantity(quantity float64) {
+	log.Println("Set quantity", i.Name, quantity)
 	i.QuantityRequired = quantity
 	i.Basket = false
 }
