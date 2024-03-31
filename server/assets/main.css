@@ -19,6 +19,7 @@
         width: 100%;
         text-decoration-line: line-through;
         text-decoration-thickness: 15%;
+        text-decoration-color: rgba(255, 0, 0, 0.5);
     }
 
     td.pcOnly, th.pcOnly {
@@ -48,6 +49,7 @@
     td.nameBasket {
         text-decoration-line: line-through;
         text-decoration-thickness: 15%;
+        text-decoration-color: rgba(255, 0, 0, 0.5);
     }
 }
 

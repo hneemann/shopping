@@ -142,7 +142,7 @@ func (items Items) Shopped(id int) {
 	if item := items.ItemById(id); item != nil {
 		if item.QuantityRequired > 0 {
 			item.Basket = !item.Basket
-			log.Println("in basket: ", item.Name, item.Basket)
+			log.Println("in basket:", item.Name, item.Basket)
 		}
 	}
 }
