@@ -30,7 +30,7 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
   <table>
     <tr>
       <td><label for="item">Kategorie:</label></td>
-      <td>
+      <td colspan="2">
       <select class="value" id="category" onchange="catChanged()">
         {{$cs := .CategorySelected}}
         {{range $i,$e := .Categories }}<option value="{{$e}}"{{if eq $e $cs}} selected="selected"{{end}}>{{$e}}</option>{{end}}
@@ -39,8 +39,8 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
     </tr>
     <tr>
       <td><label for="item">Was:</label></td>
-      <td>
-      <select class="value" name="item" id="addItemItem">
+      <td colspan="2">
+      <select class="value" name="item" id="addItemItem" onchange="setQuantitySelect('addItemItem','addItemQuantity')">
         {{$cs := .CategorySelected}}
         {{range .Items }}{{if eq .Category $cs }}<option value="{{.Id}}">{{.Name}}</option>{{end}}{{end}}
       </select>
@@ -48,8 +48,8 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
     </tr>
     <tr>
       <td><label for="quantity">Wieviel:</label></td>
-      <td>
-      <select class="value" name="quantity" id="addItemQuantity">
+      <td class="selectNumber">
+      <select class="number" name="quantity" id="addItemQuantity">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -63,23 +63,20 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
         <option value="12">12</option>
         <option value="15">15</option>
         <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="200">200</option>
-        <option value="300">300</option>
-        <option value="400">400</option>
-        <option value="500">500</option>
       </select>
       </td>
+      <td id="addItemQuantityUnit"></td>
     </tr>
     <tr>
       <td></td>
-      <td><button class="dialog" type="button" onclick="hidePopUp();">Abbrechen</button>
-          <button type="button"  onclick="hidePopUp();addItem();">Hinzufügen</button></td>
+      <td colspan="2">
+          <button class="dialog" type="button" onclick="hidePopUp();">Abbrechen</button>
+          <button type="button"  onclick="hidePopUp();addItem();">Hinzufügen</button>
+      </td>
     </tr>
   </table>
   <datalist id="items">
-    {{range .Items }}<option data-cat="{{.Category}}" data-id="{{.Id}}" value="{{.Name}}">{{.Name}}</option>{{end}}
+    {{range .Items }}<option data-cat="{{.Category}}" data-id="{{.Id}}" data-u="{{.Unit}}" value="{{.Name}}">{{.Name}}</option>{{end}}
   </datalist>
   <a id="addItemLink" href="/add">Neu</a>
 </div>
@@ -88,12 +85,12 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
   <table>
     <tr>
       <td>Was:</td>
-      <td id="setQuantityName"></td>
+      <td colspan="2" id="setQuantityName"></td>
     </tr>
     <tr>
       <td><label for="quantity">Wieviel:</label></td>
-      <td>
-      <select id="setQuantitySelect" class="value" name="quantity">
+      <td class="selectNumber">
+      <select id="setQuantitySelect" class="number" name="quantity">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -107,19 +104,16 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
         <option value="12">12</option>
         <option value="15">15</option>
         <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="200">200</option>
-        <option value="300">300</option>
-        <option value="400">400</option>
-        <option value="500">500</option>
       </select>
       </td>
+      <td style="text-align: left;"id="setQuantitySelectUnit"></td>
     </tr>
     <tr>
       <td></td>
-      <td><button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button>
-          <button type="button" onclick="hidePopUp();modifyQuantity();">Ändern</button></td>
+      <td colspan="2">
+         <button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button>
+         <button type="button" onclick="hidePopUp();modifyQuantity();">Ändern</button>
+      </td>
     </tr>
   </table>
 </div>

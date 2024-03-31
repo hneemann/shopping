@@ -4,6 +4,7 @@ function showSetQuantity(name, quantity, id) {
     document.getElementById('setQuantityName').innerHTML = name;
     document.getElementById('setQuantitySelect').value = quantity;
     quantityModifyId = id;
+    setQuantitySelectId("" + id, 'setQuantitySelect');
     showPopUpById('setQuantity');
 }
 
@@ -22,13 +23,49 @@ function catChanged() {
     var category = document.getElementById('category').value;
     var items = document.getElementById('items').getElementsByTagName('option');
     let found = "";
+    let id = 0;
     for (var i = 0; i < items.length; i++) {
         if (items[i].getAttribute("data-cat") === category) {
-            found += '<option value="' + items[i].getAttribute("data-id") + '">' + items[i].value + '</option>'
+            found += '<option value="' + items[i].getAttribute("data-id") + '">' + items[i].value + '</option>';
+            if (id === 0) {
+                id = items[i].getAttribute("data-id");
+            }
         }
     }
     document.getElementById('addItemItem').innerHTML = found;
     document.getElementById('addItemLink').href = "/add?c=" + category;
+    if (id > 0) {
+        setQuantitySelectId(id, 'addItemQuantity');
+    }
+}
+
+let factors = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20];
+
+function setQuantitySelect(idItem, idQuantity) {
+    let id = document.getElementById(idItem).value;
+    setQuantitySelectId(id, idQuantity);
+}
+
+function setQuantitySelectId(id, idQuantity) {
+    var items = document.getElementById('items').getElementsByTagName('option');
+    let unit = "";
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].getAttribute("data-id") === id) {
+            unit = items[i].getAttribute("data-u")
+            break;
+        }
+    }
+    let multiply = 1;
+    if (unit === "g" || unit === "ml") {
+        multiply = 50;
+    }
+    let options = "";
+    for (var i = 0; i < factors.length; i++) {
+        let v = factors[i] * multiply;
+        options += '<option value="' + v + '">' + v + '</option>';
+    }
+    document.getElementById(idQuantity + "Unit").innerHTML = unit;
+    document.getElementById(idQuantity).innerHTML = options;
 }
 
 let itemToDelete = -1;

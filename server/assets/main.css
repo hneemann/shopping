@@ -30,6 +30,20 @@
         padding: 0;
         border: 0;
     }
+
+    div.addItem {
+        border-style: solid;
+        border-color: darkgray;
+        background-color: white;
+        padding: 0.5em;
+        visibility: hidden;
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        width: 85%;
+        margin-left: -45%;
+        z-index: 5;
+    }
 }
 
 @media (pointer: fine) {
@@ -50,6 +64,20 @@
         text-decoration-line: line-through;
         text-decoration-thickness: 15%;
         text-decoration-color: rgba(255, 0, 0, 0.5);
+    }
+
+    div.addItem {
+        border-style: solid;
+        border-color: darkgray;
+        background-color: white;
+        padding: 1em;
+        visibility: hidden;
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        width: 20em;
+        margin-left: -10em;
+        z-index: 5;
     }
 }
 
@@ -90,24 +118,14 @@ button.dialog {
 }
 
 input.value, select.value {
-    width: 13em;
+    width: 12em;
+}
+
+td.selectNumber {
+    width: 1%;
 }
 
 td.number {
     text-align: right;
-}
-
-div.addItem {
-    border-style: solid;
-    border-color: darkgray;
-    background-color: white;
-    padding: 1em;
-    visibility: hidden;
-    position: fixed;
-    top: 20%;
-    left: 50%;
-    width: 20em;
-    margin-left: -10em;
-    z-index: 5;
 }
 
