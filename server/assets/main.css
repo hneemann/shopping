@@ -54,6 +54,8 @@
 
     table.mainTable {
         border-collapse: collapse;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     td.name {
@@ -79,6 +81,12 @@
         margin-left: -10em;
         z-index: 5;
     }
+}
+
+div.buttonRow {
+    margin-top: 1em;
+    width: 100%;
+    text-align: right;
 }
 
 .error {
@@ -111,10 +119,6 @@ th {
 button, input, select {
     font-family: Arial, sans-serif;
     font-size:inherit
-}
-
-button.dialog {
-    margin-right: 1em;
 }
 
 input.value, select.value {

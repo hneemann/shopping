@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <title>Liste</title>
@@ -21,9 +21,11 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
 </div>
 
 <div id="deleteNotify" class="addItem">
-Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
+Artikel '<span id="deleteNotifyName"></span>' löschen?
+<div class="buttonRow">
 <button onclick="hidePopUp();">Abbrechen</button>
 <button onclick="hidePopUp();deleteItem();">Löschen</button>
+</div>
 </div>
 
 <div id="addItem" class="addItem">
@@ -67,14 +69,11 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
       </td>
       <td id="addItemQuantityUnit"></td>
     </tr>
-    <tr>
-      <td></td>
-      <td colspan="2">
-          <button class="dialog" type="button" onclick="hidePopUp();">Abbrechen</button>
-          <button type="button"  onclick="hidePopUp();addItem();">Hinzufügen</button>
-      </td>
-    </tr>
   </table>
+  <div class="buttonRow">
+    <button onclick="hidePopUp()">Abbrechen</button>
+    <button onclick="hidePopUp();addItem();">Hinzufügen</button>
+  </div>
   <datalist id="items">
     {{range .Items }}<option data-cat="{{.Category}}" data-id="{{.Id}}" data-u="{{.Unit}}" value="{{.Name}}">{{.Name}}</option>{{end}}
   </datalist>
@@ -108,14 +107,11 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?<br><br>
       </td>
       <td style="text-align: left;"id="setQuantitySelectUnit"></td>
     </tr>
-    <tr>
-      <td></td>
-      <td colspan="2">
-         <button class="dialog" type="button" onclick="hidePopUp()">Abbrechen</button>
-         <button type="button" onclick="hidePopUp();modifyQuantity();">Ändern</button>
-      </td>
-    </tr>
   </table>
+  <div class="buttonRow">
+    <button onclick="hidePopUp()">Abbrechen</button>
+    <button onclick="hidePopUp();modifyQuantity();">Ändern</button>
+  </div>
 </div>
 
 </body>
