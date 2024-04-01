@@ -22,9 +22,9 @@
           <tr><th colspan="5">{{.Category}}</th></tr>
           {{- end}}
           <tr>
-            <td><img id="del_{{.Id}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="deleteItemRequest({{.Id}}, '{{.Name}}');"></td>
+            <td><img id="del_{{.Id}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="deleteItemRequest({{.Id}});"></td>
             <td {{if .Basket}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
-            <td class="number" onclick="showSetQuantity('{{.Name}}', '{{.QuantityRequired}}',{{.Id}});">{{.QuantityRequired}}</td>
+            <td class="number" onclick="showSetQuantity('{{.QuantityRequired}}',{{.Id}});">{{.QuantityRequired}}</td>
             <td>{{.Unit}}</td>
             <td class="car"><img id="car_{{.Id}}" class="list" src="/assets/sCar.svg" onclick="updateItem({{.Id}},'car');"></td>
           </tr>

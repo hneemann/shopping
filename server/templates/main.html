@@ -74,9 +74,6 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?
     <button onclick="hidePopUp()">Abbrechen</button>
     <button onclick="hidePopUp();addItem();">Hinzufügen</button>
   </div>
-  <datalist id="items">
-    {{range .Items }}<option data-cat="{{.Category}}" data-id="{{.Id}}" data-u="{{.Unit}}" value="{{.UniqueName}}">{{.UniqueName}}</option>{{end}}
-  </datalist>
   <a id="addItemLink" href="/add">Neu</a>
 </div>
 
@@ -105,7 +102,7 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?
         <option value="20">20</option>
       </select>
       </td>
-      <td style="text-align: left;"id="setQuantitySelectUnit"></td>
+      <td style="text-align: left;" id="setQuantitySelectUnit"></td>
     </tr>
   </table>
   <div class="buttonRow">
@@ -113,6 +110,11 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?
     <button onclick="hidePopUp();modifyQuantity();">Ändern</button>
   </div>
 </div>
+
+<datalist id="items">
+  {{range .Items }}<option id="{{.Id}}" data-cat="{{.Category}}" data-u="{{.Unit}}" value="{{.UniqueName}}">{{.UniqueName}}</option>
+  {{end}}
+</datalist>
 
 </body>
 </html>

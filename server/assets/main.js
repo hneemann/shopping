@@ -1,10 +1,10 @@
 let quantityModifyId = 0;
 
-function showSetQuantity(name, quantity, id) {
-    document.getElementById('setQuantityName').innerHTML = name;
+function showSetQuantity(quantity, id) {
+    document.getElementById('setQuantityName').innerHTML = getNameById(id);
     document.getElementById('setQuantitySelect').value = quantity;
     quantityModifyId = id;
-    setQuantitySelectId("" + id, 'setQuantitySelect');
+    setQuantitySelectId("" + id, 'setQuantitySelect', quantity);
     showPopUpById('setQuantity');
 }
 
@@ -27,37 +27,43 @@ function catChanged() {
     var category = document.getElementById('category').value;
     var items = document.getElementById('items').getElementsByTagName('option');
     let found = "";
-    let id = 0;
+    let id = "";
     for (var i = 0; i < items.length; i++) {
         if (items[i].getAttribute("data-cat") === category) {
-            found += '<option value="' + items[i].getAttribute("data-id") + '">' + items[i].value + '</option>';
-            if (id === 0) {
-                id = items[i].getAttribute("data-id");
+            found += '<option value="' + items[i].id + '">' + items[i].value + '</option>';
+            if (id === "") {
+                id = items[i].id;
             }
         }
     }
     document.getElementById('addItemItem').innerHTML = found;
     document.getElementById('addItemLink').href = "/add?c=" + category;
-    if (id > 0) {
+    if (id !== "") {
         setQuantitySelectId(id, 'addItemQuantity');
     }
+}
+
+function getNameById(id) {
+    var item = document.getElementById(id);
+    if (item !== null) {
+        return item.value;
+    }
+    return "";
 }
 
 let factors = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20];
 
 function setQuantitySelect(idItem, idQuantity) {
-    let id = document.getElementById(idItem).value;
-    setQuantitySelectId(id, idQuantity);
+    let item = document.getElementById(idItem);
+    let id = item.value;
+    setQuantitySelectId(id, idQuantity, 1);
 }
 
-function setQuantitySelectId(id, idQuantity) {
-    var items = document.getElementById('items').getElementsByTagName('option');
+function setQuantitySelectId(id, idQuantity, quantity) {
     let unit = "";
-    for (var i = 0; i < items.length; i++) {
-        if (items[i].getAttribute("data-id") === id) {
-            unit = items[i].getAttribute("data-u")
-            break;
-        }
+    var item = document.getElementById(id);
+    if (item !== null) {
+        unit = item.getAttribute("data-u")
     }
     let multiply = 1;
     if (unit === "g" || unit === "ml") {
@@ -66,7 +72,11 @@ function setQuantitySelectId(id, idQuantity) {
     let options = "";
     for (var i = 0; i < factors.length; i++) {
         let v = factors[i] * multiply;
-        options += '<option value="' + v + '">' + v + '</option>';
+        if (quantity == v) {
+            options += '<option value="' + v + '" selected>' + v + '</option>';
+        } else {
+            options += '<option value="' + v + '">' + v + '</option>';
+        }
     }
     document.getElementById(idQuantity + "Unit").innerHTML = unit;
     document.getElementById(idQuantity).innerHTML = options;
@@ -74,9 +84,9 @@ function setQuantitySelectId(id, idQuantity) {
 
 let itemToDelete = -1;
 
-function deleteItemRequest(id, name) {
+function deleteItemRequest(id) {
     itemToDelete = id;
-    document.getElementById('deleteNotifyName').innerHTML = name;
+    document.getElementById('deleteNotifyName').innerHTML = getNameById(id);
     showPopUpById('deleteNotify')
 }
 
