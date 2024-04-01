@@ -207,10 +207,10 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 		var weightStr string
 		var err error
 		if r.Method == http.MethodPost {
-			itemName = r.FormValue("name")
-			itemUnit = r.FormValue("unit")
+			itemName = strings.TrimSpace(r.FormValue("name"))
+			itemUnit = strings.TrimSpace(r.FormValue("unit"))
 			shop = r.FormValue("shop")
-			category = r.FormValue("category")
+			category = strings.TrimSpace(r.FormValue("category"))
 			quantity = toFloat(r.FormValue("quantity"))
 			var weight int
 			weight, weightStr, err = toIntCalc(r.FormValue("weight"))
@@ -221,7 +221,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 					if len(itemName) > 0 {
 						found := false
 						for _, e := range *data {
-							if e.Name == itemName {
+							if e.Name == itemName && e.Unit == itemUnit {
 								e.SetQuantity(quantity)
 								found = true
 								break
@@ -308,9 +308,9 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			itemToEdit = &item.Item{
-				Name:     r.FormValue("name"),
+				Name:     strings.TrimSpace(r.FormValue("name")),
 				Shops:    splitShop(r.FormValue("shop")),
-				Unit:     r.FormValue("unit"),
+				Unit:     strings.TrimSpace(r.FormValue("unit")),
 				Category: item.Category(r.FormValue("category")),
 			}
 

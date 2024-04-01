@@ -106,6 +106,7 @@ func (items Items) Replace(id int, edit *Item) {
 	for i, item := range items {
 		if item.Id == id {
 			edit.Id = item.Id
+			edit.QuantityRequired = item.QuantityRequired
 			items[i] = edit
 		}
 	}
@@ -246,9 +247,29 @@ func (items *Items) Shops() []string {
 	return result
 }
 
+func (items *Items) createUniqueNames() {
+	names := make(map[string]*[]*Item)
+	for _, item := range *items {
+		list := names[item.Name]
+		if list == nil {
+			list = &[]*Item{}
+			names[item.Name] = list
+		}
+		*list = append(*list, item)
+	}
+	for _, list := range names {
+		if len(*list) > 1 {
+			for _, i := range *list {
+				i.uniqueName = i.Name + ", " + i.Unit
+			}
+		}
+	}
+}
+
 type Item struct {
 	Id               int
 	Name             string
+	uniqueName       string
 	Shops            []string
 	QuantityRequired float64
 	Basket           bool
@@ -275,6 +296,13 @@ func New(name string, unit string, weight int, weightStr string, volume int, vol
 	}
 }
 
+func (i *Item) UniqueName() string {
+	if i.uniqueName != "" {
+		return i.uniqueName
+	}
+	return i.Name
+}
+
 func (i *Item) SetQuantity(quantity float64) {
 	log.Println("Set quantity", i.Name, quantity)
 	i.QuantityRequired = quantity
@@ -283,6 +311,9 @@ func (i *Item) SetQuantity(quantity float64) {
 
 func (i *Item) Less(other *Item, cat func(Category) int) bool {
 	if i.Category == other.Category {
+		if i.Name == other.Name {
+			return i.Unit < other.Unit
+		}
 		return i.Name < other.Name
 	}
 	if cat != nil {
@@ -355,6 +386,8 @@ func Load(file string) (*Items, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	items.createUniqueNames()
 
 	return &items, nil
 }
