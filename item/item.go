@@ -18,7 +18,7 @@ var Categories = CategoryList{
 	"Konserven", "Fertiggerichte", "Hygiene", "Getränke", "Tiefkühl", "Süßes", "Anderes",
 }
 
-var REWE = MapOrder(Categories...)
+var rewe = MapOrder(Categories...)
 
 func (cl CategoryList) Index(category Category) int {
 	for i, c := range cl {
@@ -68,7 +68,8 @@ func (items *Items) AddItem(item *Item) {
 	}
 	item.Id = id + 1
 	*items = append(*items, item)
-	(*items).Order(REWE)
+	items.createUniqueNames()
+	items.Order(rewe)
 }
 
 func (items *Items) DeleteItem(id int) {
@@ -81,6 +82,8 @@ func (items *Items) DeleteItem(id int) {
 	if index >= 0 {
 		log.Println("finally delete item", (*items)[index].Name)
 		*items = append((*items)[:index], (*items)[index+1:]...)
+		items.createUniqueNames()
+		items.Order(rewe)
 	}
 }
 
@@ -110,6 +113,8 @@ func (items Items) Replace(id int, edit *Item) {
 			items[i] = edit
 		}
 	}
+	items.createUniqueNames()
+	items.Order(rewe)
 }
 
 func (items Items) Total() Total {
@@ -250,6 +255,7 @@ func (items *Items) Shops() []string {
 func (items *Items) createUniqueNames() {
 	names := make(map[string]*[]*Item)
 	for _, item := range *items {
+		item.uniqueName = ""
 		list := names[item.Name]
 		if list == nil {
 			list = &[]*Item{}

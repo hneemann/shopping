@@ -10,7 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"io"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"os/signal"
@@ -89,12 +88,7 @@ func (s *DataManager) RestoreData(user string, pass string) (*item.Items, error)
 			items := item.Items{
 				{Name: "Milch", QuantityRequired: 1, Unit: "l", Weight: 1000, Volume: 1000, Category: item.Cooled},
 				{Name: "Butter", QuantityRequired: 1, Unit: "Stück", Weight: 250, Volume: 250, Category: item.Cooled},
-				{Name: "Graubrot", QuantityRequired: 1, Unit: "Paket", Weight: 500, Volume: int(math.Round(math.Pi * 9 * 9 / 2 * 8)), Category: item.Bread},
-				{Name: "Toastbrot", QuantityRequired: 1, Unit: "Paket", Weight: 500, Volume: 10 * 10 * 25, Category: item.Bread},
-				{Name: "Katzenpfötchen", QuantityRequired: 1, Unit: "Paket", Weight: 175, Volume: 13 * 13 * 2, Category: item.Sweets},
-				{Name: "Mini-Pizzen", QuantityRequired: 1, Unit: "Stück", Weight: 432, Volume: int(math.Round(2.8 * 28 * 23)), Category: item.Frozen},
 			}
-			items.Order(item.REWE)
 			return &items, nil
 		}
 		return nil, err

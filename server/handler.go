@@ -318,8 +318,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			if err == nil {
 				itemToEdit.Volume, itemToEdit.VolumeStr, err = toIntCalc(r.FormValue("volume"))
 				if err == nil {
-					(*data).Replace(id, itemToEdit)
-					(*data).Order(item.REWE)
+					data.Replace(id, itemToEdit)
 					http.Redirect(w, r, "/listAll", http.StatusFound)
 					return
 				}
