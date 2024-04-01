@@ -19,6 +19,10 @@ function addItem() {
     updateTable("id=" + id + "&mode=add&q=" + q)
 }
 
+function shopChanged() {
+    updateTable("")
+}
+
 function catChanged() {
     var category = document.getElementById('category').value;
     var items = document.getElementById('items').getElementsByTagName('option');
@@ -87,6 +91,17 @@ function updateItem(id, mode) {
 }
 
 function updateTable(query) {
+    let shopElement = document.getElementById('selectedShop');
+    if (shopElement !== null) {
+        let shop = shopElement.value;
+        if (shop !== "") {
+            if (query !== "") {
+                query += "&";
+            }
+            query += "&s=" + shop;
+        }
+    }
+
     fetch("/table/?" + query, {
         signal: AbortSignal.timeout(3000)
     })

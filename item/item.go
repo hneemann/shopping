@@ -225,9 +225,25 @@ func (items Items) Order(c func(Category) int) {
 	})
 }
 
+func (items *Items) Shops() []string {
+	shops := make(map[string]struct{})
+	for _, item := range *items {
+		if item.QuantityRequired > 0 {
+			shops[item.Shop] = struct{}{}
+		}
+	}
+	var result []string
+	for shop := range shops {
+		result = append(result, shop)
+	}
+	sort.Strings(result)
+	return result
+}
+
 type Item struct {
 	Id               int
 	Name             string
+	Shop             string
 	QuantityRequired float64
 	Basket           bool
 	Unit             string
@@ -240,10 +256,11 @@ type Item struct {
 	OutlookState     OutlookState
 }
 
-func New(name string, unit string, weight int, weightStr string, volume int, volumeStr string, category Category) *Item {
+func New(name string, unit string, weight int, weightStr string, volume int, volumeStr string, category Category, shop string) *Item {
 	return &Item{
 		Name:      name,
 		Category:  category,
+		Shop:      shop,
 		Unit:      unit,
 		Weight:    weight,
 		WeightStr: weightStr,
@@ -266,6 +283,14 @@ func (i *Item) Less(other *Item, cat func(Category) int) bool {
 		return cat(i.Category) < cat(other.Category)
 	}
 	return i.Category < other.Category
+}
+
+func (i *Item) ShopMatches(shop string) bool {
+	return shop == "" || i.Shop == "" || i.Shop == shop
+}
+
+func (i *Item) ShopIs(shop string) bool {
+	return i.Shop != "" && i.Shop == shop
 }
 
 func (i *Item) Suggest() float64 {

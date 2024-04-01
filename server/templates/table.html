@@ -1,19 +1,29 @@
     <tr>
       <td><a href="/listAll"><img class="list" src="/assets/icon.svg" title="Bearbeiten"></a></td>
-      <td colspan="3" style="font-size:115%;font-weight:bold;">Einkaufszettel</td>
+      <td colspan="3" style="font-size:115%;font-weight:bold;">Einkaufszettel
+        {{ if gt (len .Shops) 1}}
+        <select  id="selectedShop" onchange="shopChanged();">
+          {{ $shop:=.Shop }}
+          {{range .Shops}}
+            <option value="{{.}}" {{if eq . $shop}}selected{{end}}>{{.}}</option>
+          {{end}}
+        </select>
+        {{end}}
+      </td>
       <td><img class="normal" onclick="showPopUpById('addItem')" src="/assets/add.svg" title="Artikel hinzufügen"></td>
     </tr>
     {{$lastCat := ""}}
+    {{$shop := .Shop}}
     {{$hide := .HideCart}}
     {{range .Items }}
-      {{- if gt .QuantityRequired 0.0 -}}
+      {{- if and (.ShopMatches $shop) (gt .QuantityRequired 0.0) -}}
         {{- if not (and $hide .Basket) -}}
           {{- if not (eq .Category $lastCat) -}}
           <tr><th colspan="5">{{.Category}}</th></tr>
           {{- end}}
           <tr>
             <td><img id="del_{{.Id}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="deleteItemRequest({{.Id}}, '{{.Name}}');"></td>
-            <td {{if .Basket}}class="nameBasket"{{else}}class="name"{{end}}>{{.Name}}</td>
+            <td {{if .Basket}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
             <td class="number" onclick="showSetQuantity('{{.Name}}', '{{.QuantityRequired}}',{{.Id}});">{{.QuantityRequired}}</td>
             <td>{{.Unit}}</td>
             <td class="car"><img id="car_{{.Id}}" class="list" src="/assets/sCar.svg" onclick="updateItem({{.Id}},'car');"></td>

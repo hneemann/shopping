@@ -32,6 +32,12 @@
          </select>
        </td>
      </tr>
+     <tr>
+       <td><label for="shop">nur erhältlich bei:</label></td>
+       <td>
+         <input class="value" list="shops" type="text" id="shop" name="shop" placeholder="Geschäft"/>
+       </td>
+     </tr>
      {{if not .QHidden}}
      <tr>
        <td><label for="quantity">Anzahl:</label></td>
@@ -59,11 +65,13 @@
   {{if .QHidden}}
   <input type="hidden" name="quantity" value="{{.Quantity}}"/>
   {{end}}
+    <datalist id="shops">
+      {{range .Shops }}<option value="{{.}}">{{end}}
+    </datalist>
 
     <datalist id="units">
-        <option value="Stück">
         <option value="Liter">
-        <option value="Paket">
+        <option value="Packung">
         <option value="Glas">
         <option value="Dose">
         <option value="Tüte">

@@ -31,6 +31,8 @@ type mainData struct {
 	HideCart         bool
 	Categories       item.CategoryList
 	CategorySelected item.Category
+	Shop             string
+	Shops            []string
 }
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +42,7 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 			Items:            data,
 			HideCart:         false,
 			Categories:       item.Categories,
+			Shops:            data.Shops(),
 			CategorySelected: categorySelected,
 		})
 		if err != nil {
@@ -51,6 +54,7 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 func TableHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
 		query := r.URL.Query()
+		shop := query.Get("s")
 		idStr := query.Get("id")
 		if idStr != "" {
 			id := toInt(idStr)
@@ -77,8 +81,10 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := tableTemp.Execute(w, mainData{
 			Items:      data,
+			Shop:       shop,
 			HideCart:   query.Get("h") != "0",
 			Categories: item.Categories,
+			Shops:      data.Shops(),
 		})
 		if err != nil {
 			log.Println(err)
@@ -189,12 +195,13 @@ type addData struct {
 	Volume     string
 	QHidden    bool
 	Categories []item.Category
+	Shops      []string
 	Error      error
 }
 
 func AddHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
-		var itemName, itemUnit, category string
+		var itemName, itemUnit, category, shop string
 		var quantity float64 = 1
 		var volumeStr string
 		var weightStr string
@@ -202,6 +209,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			itemName = r.FormValue("name")
 			itemUnit = r.FormValue("unit")
+			shop = r.FormValue("shop")
 			category = r.FormValue("category")
 			quantity = toFloat(r.FormValue("quantity"))
 			var weight int
@@ -220,7 +228,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 							}
 						}
 						if !found {
-							i := item.New(itemName, itemUnit, weight, weightStr, volume, volumeStr, item.Category(category))
+							i := item.New(itemName, itemUnit, weight, weightStr, volume, volumeStr, item.Category(category), shop)
 							i.SetQuantity(quantity)
 							data.AddItem(i)
 						}
@@ -244,6 +252,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 			Volume:     volumeStr,
 			QHidden:    false,
 			Categories: item.Categories,
+			Shops:      data.Shops(),
 			Error:      err,
 		})
 		if err != nil {
@@ -289,6 +298,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 
 			itemToEdit = &item.Item{
 				Name:     r.FormValue("name"),
+				Shop:     r.FormValue("shop"),
 				Unit:     r.FormValue("unit"),
 				Category: item.Category(r.FormValue("category")),
 			}
@@ -328,11 +338,13 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			Item       *item.Item
 			Id         int
 			Categories []item.Category
+			Shops      []string
 			Error      error
 		}{
 			Item:       itemToEdit,
 			Id:         id,
 			Categories: item.Categories,
+			Shops:      data.Shops(),
 			Error:      err,
 		}
 

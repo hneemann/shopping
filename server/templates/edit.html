@@ -33,6 +33,12 @@
        </td>
      </tr>
      <tr>
+       <td><label for="shop">nur erhältlich bei:</label></td>
+       <td>
+         <input class="value" list="shops" type="text" id="shop" name="shop" placeholder="Geschäft" value="{{.Item.Shop}}"/>
+       </td>
+     </tr>
+     <tr>
        <td><label for="weight">Gewicht:</label></td>
        <td><input class="value" id="weight" name="weight" placeholder="Gewicht in g" value="{{.Item.WeightStr}}"/></td>
        <td>g</td>
@@ -47,6 +53,10 @@
   {{if .Error}}
     <p class="error">{{.Error}}</p>
   {{end}}
+
+  <datalist id="shops">
+    {{range .Shops }}<option value="{{.}}">{{end}}
+  </datalist>
 
   <p>
   <a href="/listAll"><button type="button">Abbrechen</button></a>
