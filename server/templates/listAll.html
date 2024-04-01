@@ -22,7 +22,7 @@
       <tr>
         <td>{{.Name}}</td>
         <td><img class="list" onclick="modify({{.Id}},-1)" src="/assets/sub.svg"></td>
-        <td class="number" id="q{{.Id}}">{{if .QuantityRequired}}{{.QuantityRequired}}{{else}}-{{end}}</td>
+        <td class="number" id="q{{.Id}}"{{if not .QuantityRequired}} style="text-align: center;"{{end}}>{{if .QuantityRequired}}{{.QuantityRequired}}{{else}}-{{end}}</td>
         <td><img class="list" onclick="modify({{.Id}},1)" src="/assets/add.svg"></td>
         <td>{{.Unit}}</td>
         <td class="number pcOnly" title="Gewicht in g">{{.Weight}}</td>
