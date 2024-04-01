@@ -193,7 +193,7 @@ func (items Items) ModQuantity(id, n int, increasedSpeed bool) float64 {
 		} else {
 			item.QuantityRequired += float64(n)
 		}
-		if item.QuantityRequired < 0 {
+		if item.QuantityRequired < 0.001 {
 			log.Println("negative quantity avoided", item.Name)
 			item.QuantityRequired = 0
 		}

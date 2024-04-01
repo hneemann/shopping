@@ -100,7 +100,11 @@ func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
 			id := toInt(idStr)
 			if data.IdValid(id) {
 				q := (*data).ModQuantity(id, toInt(query.Get("n")), true)
-				w.Write([]byte(fmt.Sprintf("%1.0f", q)))
+				if q > 0 {
+					w.Write([]byte(fmt.Sprintf("%1.0f", q)))
+				} else {
+					w.Write([]byte("-"))
+				}
 				return
 			}
 		}
