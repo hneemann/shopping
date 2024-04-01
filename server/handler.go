@@ -228,7 +228,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 							}
 						}
 						if !found {
-							i := item.New(itemName, itemUnit, weight, weightStr, volume, volumeStr, item.Category(category), shop)
+							i := item.New(itemName, itemUnit, weight, weightStr, volume, volumeStr, item.Category(category), splitShop(shop))
 							i.SetQuantity(quantity)
 							data.AddItem(i)
 						}
@@ -260,6 +260,17 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+}
+
+func splitShop(shop string) []string {
+	var sl []string
+	for _, s := range strings.Split(shop, ",") {
+		s = strings.TrimSpace(s)
+		if len(s) > 0 {
+			sl = append(sl, s)
+		}
+	}
+	return sl
 }
 
 var listAllTemp = Templates.Lookup("listAll.html")
@@ -298,7 +309,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 
 			itemToEdit = &item.Item{
 				Name:     r.FormValue("name"),
-				Shop:     r.FormValue("shop"),
+				Shops:    splitShop(r.FormValue("shop")),
 				Unit:     r.FormValue("unit"),
 				Category: item.Category(r.FormValue("category")),
 			}
