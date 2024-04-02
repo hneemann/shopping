@@ -92,26 +92,6 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.Items); ok {
-		query := r.URL.Query()
-		idStr := query.Get("id")
-		if idStr != "" {
-			id := toInt(idStr)
-			if data.IdValid(id) {
-				q := (*data).ModQuantity(id, toInt(query.Get("n")), true)
-				if q > 0 {
-					w.Write([]byte(fmt.Sprintf("%1.0f", q)))
-				} else {
-					w.Write([]byte("-"))
-				}
-				return
-			}
-		}
-	}
-	w.Write([]byte("-"))
-}
-
 func toFloat(str string) float64 {
 	str = strings.TrimSpace(str)
 	if len(str) == 0 {
@@ -225,7 +205,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 					if len(itemName) > 0 {
 						found := false
 						for _, e := range *data {
-							if e.Name == itemName && e.Unit == itemUnit {
+							if e.Name == itemName && e.UnitSingular() == itemUnit {
 								e.SetQuantity(quantity)
 								found = true
 								break
@@ -295,6 +275,27 @@ func ListAllHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var listAllRowTemp = Templates.Lookup("listAllRow.html")
+
+func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
+	if data, ok := r.Context().Value("data").(*item.Items); ok {
+		query := r.URL.Query()
+		idStr := query.Get("id")
+		if idStr != "" {
+			id := toInt(idStr)
+			if data.IdValid(id) {
+				data.ModQuantity(id, toInt(query.Get("n")), true)
+				err := listAllRowTemp.Execute(w, data.ItemById(id))
+				if err != nil {
+					log.Println(err)
+				}
+				return
+			}
+		}
+	}
+	w.Write([]byte("-"))
+}
+
 var editTemp = Templates.Lookup("edit.html")
 
 func EditHandler(w http.ResponseWriter, r *http.Request) {
@@ -314,7 +315,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			itemToEdit = &item.Item{
 				Name:     strings.TrimSpace(r.FormValue("name")),
 				Shops:    splitShop(r.FormValue("shop")),
-				Unit:     strings.TrimSpace(r.FormValue("unit")),
+				UnitDef:  strings.TrimSpace(r.FormValue("unit")),
 				Category: item.Category(r.FormValue("category")),
 			}
 

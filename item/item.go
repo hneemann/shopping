@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -185,7 +186,7 @@ func (items Items) SetQuantity(id, q int) {
 	}
 }
 
-func (items Items) ModQuantity(id, n int, increasedSpeed bool) float64 {
+func (items Items) ModQuantity(id, n int, increasedSpeed bool) {
 	if item := items.ItemById(id); item != nil {
 		log.Println("mod quantity", item.Name, n)
 		if item.Weight == 1 && increasedSpeed {
@@ -198,9 +199,7 @@ func (items Items) ModQuantity(id, n int, increasedSpeed bool) float64 {
 			item.QuantityRequired = 0
 		}
 		item.Basket = false
-		return item.QuantityRequired
 	}
-	return 0
 }
 
 func (items Items) SomethingHidden() bool {
@@ -266,7 +265,7 @@ func (items *Items) createUniqueNames() {
 	for _, list := range names {
 		if len(*list) > 1 {
 			for _, i := range *list {
-				i.uniqueName = i.Name + ", " + i.Unit
+				i.uniqueName = i.Name + ", " + i.UnitSingular()
 			}
 		}
 	}
@@ -279,7 +278,10 @@ type Item struct {
 	Shops            []string
 	QuantityRequired float64
 	Basket           bool
-	Unit             string
+	UnitDef          string `json:"Unit"`
+	unitCreated      bool
+	unitSingular     string
+	unitPlural       string
 	Weight           int
 	WeightStr        string
 	Volume           int
@@ -294,7 +296,7 @@ func New(name string, unit string, weight int, weightStr string, volume int, vol
 		Name:      name,
 		Category:  category,
 		Shops:     shops,
-		Unit:      unit,
+		UnitDef:   unit,
 		Weight:    weight,
 		WeightStr: weightStr,
 		Volume:    volume,
@@ -318,7 +320,7 @@ func (i *Item) SetQuantity(quantity float64) {
 func (i *Item) Less(other *Item, cat func(Category) int) bool {
 	if i.Category == other.Category {
 		if i.Name == other.Name {
-			return i.Unit < other.Unit
+			return i.UnitSingular() < other.UnitSingular()
 		}
 		return i.Name < other.Name
 	}
@@ -379,6 +381,62 @@ func (i *Item) Suggest() float64 {
 		suggestion = 0
 	}
 	return suggestion
+}
+
+func (i *Item) UnitSingular() string {
+	i.createUnits()
+	return i.unitSingular
+}
+
+func (i *Item) UnitPlural() string {
+	i.createUnits()
+	return i.unitPlural
+}
+
+func (i *Item) Unit() string {
+	i.createUnits()
+	if i.QuantityRequired == 1 {
+		return i.unitSingular
+	}
+	return i.unitPlural
+}
+
+var unitPluralMap = map[string]string{
+	"Dose":    "Dosen",
+	"Packung": "Packungen",
+	"Paket":   "Pakete",
+	"Tüte":    "Tüten",
+	"Glas":    "Gläser",
+	"Stange":  "Stangen",
+	"Flasche": "Flaschen",
+	"Rolle":   "Rollen",
+	"Tube":    "Tuben",
+}
+
+func (i *Item) createUnits() {
+	if i.unitCreated {
+		return
+	}
+	i.unitCreated = true
+
+	u := strings.TrimSpace(i.UnitDef)
+	if len(u) == 0 {
+		i.unitSingular = ""
+		i.unitPlural = ""
+		return
+	}
+	p := strings.Index(u, ",")
+	if p > 0 {
+		i.unitSingular = strings.TrimSpace(u[:p])
+		i.unitPlural = strings.TrimSpace(u[p+1:])
+	} else {
+		i.unitSingular = u
+		if up, ok := unitPluralMap[i.unitSingular]; ok {
+			i.unitPlural = up
+		} else {
+			i.unitPlural = i.unitSingular
+		}
+	}
 }
 
 func Load(file string) (*Items, error) {

@@ -1,0 +1,9 @@
+    <td>{{.Name}}</td>
+    <td><img class="list" onclick="modify({{.Id}},-1)" src="/assets/sub.svg"></td>
+    <td class="number" {{if not .QuantityRequired}} style="text-align: center;"{{end}}>{{if .QuantityRequired}}{{.QuantityRequired}}{{else}}-{{end}}</td>
+    <td><img class="list" onclick="modify({{.Id}},1)" src="/assets/add.svg"></td>
+    <td>{{.Unit}}</td>
+    <td class="number pcOnly" title="Gewicht in g">{{.Weight}}</td>
+    <td class="number pcOnly" title="Volumen in ml">{{.Volume}}</td>
+    <td class="pcOnly" title="Geschäft">{{.ShopsStr}}</td>
+    <td><a href="/edit/?item={{.Id}}"><img class="list" src="/assets/edit.svg" title="Bearbeiten"></a></td>

@@ -86,8 +86,8 @@ func (s *DataManager) RestoreData(user string, pass string) (*item.Items, error)
 	if _, err := os.Stat(file); err != nil {
 		if os.IsNotExist(err) {
 			items := item.Items{
-				{Name: "Milch", QuantityRequired: 1, Unit: "l", Weight: 1000, Volume: 1000, Category: item.Cooled},
-				{Name: "Butter", QuantityRequired: 1, Unit: "Stück", Weight: 250, Volume: 250, Category: item.Cooled},
+				{Name: "Milch", QuantityRequired: 1, UnitDef: "l", Weight: 1000, Volume: 1000, Category: item.Cooled},
+				{Name: "Butter", QuantityRequired: 1, UnitDef: "Stück", Weight: 250, Volume: 250, Category: item.Cooled},
 			}
 			return &items, nil
 		}
