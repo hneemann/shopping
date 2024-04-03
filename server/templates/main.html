@@ -32,8 +32,8 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?
   <table>
     <tr>
       <td><label for="item">Kategorie:</label></td>
-      <td colspan="2">
-      <select class="value" id="category" onchange="catChanged()">
+      <td colspan="4">
+      <select class="value" id="category" onchange="addItemCatChanged()">
         {{$cs := .CategorySelected}}
         {{range $i,$e := .Categories }}<option value="{{$e}}"{{if eq $e $cs}} selected="selected"{{end}}>{{$e}}</option>{{end}}
       </select>
@@ -41,33 +41,23 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?
     </tr>
     <tr>
       <td><label for="item">Was:</label></td>
-      <td colspan="2">
-      <select class="value" name="item" id="addItemItem" onchange="setQuantitySelect('addItemItem','addItemQuantity')">
+      <td colspan="4">
+      <select class="value" name="item" id="addItemItem" onchange="addItemItemChanged()">
         {{$cs := .CategorySelected}}
         {{range .Items }}{{if eq .Category $cs }}<option value="{{.Id}}">{{.Name}}</option>{{end}}{{end}}
       </select>
       </td>
     </tr>
     <tr>
-      <td><label for="quantity">Wieviel:</label></td>
-      <td class="selectNumber">
-      <select class="number" name="quantity" id="addItemQuantity">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="12">12</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
-      </select>
+      <td>Wieviel:</td>
+      <td style="width:1%;">
+        <img class="list" onclick="modAddQuantity(-1)" src="/assets/sub.svg">
       </td>
-      <td id="addItemQuantityUnit"></td>
+      <td style="width:1%;" id="addItemQuantity">1</td>
+      <td style="width:1%;">
+        <img class="list" onclick="modAddQuantity(1)" src="/assets/add.svg">
+      </td>
+      <td id="addItemUnit"></td>
     </tr>
   </table>
   <div class="buttonRow">
@@ -80,34 +70,24 @@ Artikel '<span id="deleteNotifyName"></span>' löschen?
 <div id="setQuantity" class="addItem">
   <table>
     <tr>
-      <td>Was:</td>
-      <td colspan="2" id="setQuantityName"></td>
+      <td style="width:30%;">Was:</td>
+      <td colspan="4" id="setQuantityName"></td>
     </tr>
     <tr>
-      <td><label for="quantity">Wieviel:</label></td>
-      <td class="selectNumber">
-      <select id="setQuantitySelect" class="number" name="quantity">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="12">12</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
-      </select>
+      <td>Wieviel:</td>
+      <td style="width:1%;">
+        <img class="list" onclick="setQuantityMod(-1)" src="/assets/sub.svg">
       </td>
-      <td style="text-align: left;" id="setQuantitySelectUnit"></td>
+      <td style="width:1%;" id="setQuantityQuantity">1</td>
+      <td style="width:1%;">
+        <img class="list" onclick="setQuantityMod(1)" src="/assets/add.svg">
+      </td>
+      <td style="text-align: left;" id="setQuantityUnit"></td>
     </tr>
   </table>
   <div class="buttonRow">
     <button onclick="hidePopUp()">Abbrechen</button>
-    <button onclick="hidePopUp();modifyQuantity();">Ändern</button>
+    <button onclick="hidePopUp();setQuantityModify();">Ändern</button>
   </div>
 </div>
 

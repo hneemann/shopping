@@ -2,20 +2,33 @@ let quantityModifyId = 0;
 
 function showSetQuantity(quantity, id) {
     document.getElementById('setQuantityName').innerHTML = getNameById(id);
-    document.getElementById('setQuantitySelect').value = quantity;
     quantityModifyId = id;
-    setQuantitySelectId("" + id, 'setQuantitySelect', quantity);
+
+    let u = getUnitById(id);
+    increment = u.increment;
+    document.getElementById("setQuantityUnit").innerHTML = u.unit;
+    document.getElementById('setQuantityQuantity').innerHTML = "" + quantity;
     showPopUpById('setQuantity');
 }
 
-function modifyQuantity() {
-    let q = document.getElementById('setQuantitySelect').value;
-    updateTable("id=" + quantityModifyId + "&mode=set&q=" + q)
+function setQuantityMod(inc) {
+    let v = parseInt(document.getElementById('setQuantityQuantity').innerHTML);
+    v+=increment*inc;
+    if (v < increment) {
+        v = increment;
+    }
+    document.getElementById('setQuantityQuantity').innerHTML = v;
+}
+
+function setQuantityModify() {
+    let text = document.getElementById('setQuantityQuantity').innerHTML;
+    let v = parseInt(text);
+    updateTable("id=" + quantityModifyId + "&mode=set&q=" + v)
 }
 
 function addItem() {
     let id = document.getElementById('addItemItem').value;
-    let q = document.getElementById('addItemQuantity').value;
+    let q = document.getElementById('addItemQuantity').innerHTML;
     updateTable("id=" + id + "&mode=add&q=" + q)
 }
 
@@ -23,7 +36,12 @@ function shopChanged() {
     updateTable("")
 }
 
-function catChanged() {
+function addItemShow() {
+    addItemItemChanged();
+    showPopUpById('addItem')
+}
+
+function addItemCatChanged() {
     var category = document.getElementById('category').value;
     var items = document.getElementById('items').getElementsByTagName('option');
     let found = "";
@@ -39,7 +57,7 @@ function catChanged() {
     document.getElementById('addItemItem').innerHTML = found;
     document.getElementById('addItemLink').href = "/add?c=" + category;
     if (id !== "") {
-        setQuantitySelectId(id, 'addItemQuantity');
+        addItemItemChanged();
     }
 }
 
@@ -51,35 +69,37 @@ function getNameById(id) {
     return "";
 }
 
-let factors = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20];
+let increment = 1
 
-function setQuantitySelect(idItem, idQuantity) {
-    let item = document.getElementById(idItem);
-    let id = item.value;
-    setQuantitySelectId(id, idQuantity, 1);
-}
-
-function setQuantitySelectId(id, idQuantity, quantity) {
+function getUnitById(id) {
     let unit = "";
-    var item = document.getElementById(id);
+    let item = document.getElementById(id);
     if (item !== null) {
         unit = item.getAttribute("data-u")
     }
-    let multiply = 1;
+    let i = 1;
     if (unit === "g" || unit === "ml") {
-        multiply = 50;
+        i = 50;
     }
-    let options = "";
-    for (var i = 0; i < factors.length; i++) {
-        let v = factors[i] * multiply;
-        if (quantity == v) {
-            options += '<option value="' + v + '" selected>' + v + '</option>';
-        } else {
-            options += '<option value="' + v + '">' + v + '</option>';
-        }
+    return {unit: unit, increment: i};
+}
+
+function addItemItemChanged() {
+    let itemSelect = document.getElementById('addItemItem');
+    let id = itemSelect.value;
+    let u = getUnitById(id);
+    increment = u.increment;
+    document.getElementById("addItemUnit").innerHTML = u.unit;
+    document.getElementById('addItemQuantity').innerHTML = "" + increment;
+}
+
+function modAddQuantity(inc) {
+    let v = parseInt(document.getElementById('addItemQuantity').innerText);
+    v+=increment*inc;
+    if (v < increment) {
+        v = increment;
     }
-    document.getElementById(idQuantity + "Unit").innerHTML = unit;
-    document.getElementById(idQuantity).innerHTML = options;
+    document.getElementById('addItemQuantity').innerText = v;
 }
 
 let itemToDelete = -1;
@@ -108,7 +128,7 @@ function updateTable(query) {
             if (query !== "") {
                 query += "&";
             }
-            query += "&s=" + shop;
+            query += "s=" + shop;
         }
     }
 
