@@ -1,7 +1,7 @@
     <tr>
       <td colspan="3" style="font-size:115%;font-weight:bold;">
         <a href="/listAll"><img class="list" src="/assets/icon.svg" title="Bearbeiten"></a>
-        Einkaufszettel
+        <span style="position: relative;bottom:0.2em">Einkaufszettel</span>
         {{ if gt (len .Shops) 1}}
         <select  id="selectedShop" onchange="shopChanged();">
           {{ $shop:=.Shop }}
