@@ -37,17 +37,22 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1060"
-     inkscape:window-height="780"
+     inkscape:window-width="1680"
+     inkscape:window-height="997"
      id="namedview14"
-     showgrid="false"
-     inkscape:zoom="0.69119205"
-     inkscape:cx="317.53377"
-     inkscape:cy="400"
+     showgrid="true"
+     inkscape:zoom="3.0584249"
+     inkscape:cx="328.1298"
+     inkscape:cy="324.88717"
      inkscape:window-x="0"
      inkscape:window-y="25"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg12" />
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg12"
+     inkscape:document-rotation="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid834" />
+  </sodipodi:namedview>
   <rect
      width="48"
      height="48"
@@ -62,13 +67,14 @@
      stroke-linejoin="round"
      id="path4" />
   <path
-     d="m 14.99917,22.997277 h 4.007883 L 32.876615,8.8367452 29.013866,4.9747715 14.999057,19.13553 Z"
+     d="M 14.740157,22.677165 20.409449,20.409449 32.88189,7.9370079 29.480315,4.5354331 17.007874,17.007874 Z"
      fill="#2f88ff"
      stroke="#000000"
      stroke-width="4.00544"
      stroke-linejoin="round"
      id="path6"
-     style="fill:none" />
+     style="fill:none"
+     sodipodi:nodetypes="cccccc" />
   <path
      d="M30 37L24 43L18 37"
      stroke="#000000"
