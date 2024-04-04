@@ -1,6 +1,7 @@
     <tr>
-      <td><a href="/listAll"><img class="list" src="/assets/icon.svg" title="Bearbeiten"></a></td>
-      <td colspan="3" style="font-size:115%;font-weight:bold;">Einkaufszettel
+      <td colspan="3" style="font-size:115%;font-weight:bold;">
+        <a href="/listAll"><img class="list" src="/assets/icon.svg" title="Bearbeiten"></a>
+        Einkaufszettel
         {{ if gt (len .Shops) 1}}
         <select  id="selectedShop" onchange="shopChanged();">
           {{ $shop:=.Shop }}
@@ -19,14 +20,13 @@
       {{- if and (.ShopMatches $shop) (gt .QuantityRequired 0.0) -}}
         {{- if not (and $hide .Basket) -}}
           {{- if not (eq .Category $lastCat) -}}
-          <tr><th colspan="5">{{.Category}}</th></tr>
+          <tr><th colspan="4">{{.Category}}</th></tr>
           {{- end}}
           <tr>
-            <td><img id="del_{{.Id}}" class="list" src="/assets/delete.svg" title="Entfernen" onclick="deleteItemRequest({{.Id}});"></td>
-            <td {{if .Basket}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
+            <td onclick="showSetQuantity('{{.QuantityRequired}}',{{.Id}});" {{if .Basket}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
             <td class="number" onclick="showSetQuantity('{{.QuantityRequired}}',{{.Id}});">{{.QuantityRequired}}</td>
             <td>{{.Unit}}</td>
-            <td class="car"><img id="car_{{.Id}}" class="list" src="/assets/sCar.svg" onclick="updateItem({{.Id}},'car');"></td>
+            <td class="car"><img id="car_{{.Id}}" class="list" {{if .Basket}}src="/assets/eCar.svg"{{else}}src="/assets/sCar.svg"{{end}} onclick="updateItem({{.Id}},'car');"></td>
           </tr>
           {{- $lastCat = .Category -}}
         {{- end -}}
@@ -35,7 +35,7 @@
 
     <tr>
     {{$total := .Items.Total}}
-    <td style="padding-top: 1em; padding-bottom: 1em;" colspan="5">Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</td>
+    <td style="padding-top: 1em; padding-bottom: 1em;" colspan="4">Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</td>
     </tr>
 
     {{if .Items.SomethingHidden}}
@@ -44,7 +44,7 @@
       {{if .HideCart}}<img class="list" onclick="updateTable('h=0')" src="/assets/eye.svg" title="Zeige Alles">
       {{else        }}<img class="list" onclick="updateTable('h=1')" src="/assets/eye-slash.svg" title="Zeige nur Fehlendes">{{end}}
     </td>
-    <td colspan="3"></td><td>
+    <td colspan="2"></td><td>
       <img class="normal" onclick="showPopUpById('payed')" src="/assets/register.svg" title="Bezahlt">
     </td>
     </tr>

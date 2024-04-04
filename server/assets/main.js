@@ -26,6 +26,10 @@ function setQuantityModify() {
     updateTable("id=" + quantityModifyId + "&mode=set&q=" + v)
 }
 
+function setQuantityDelete() {
+    updateTable("id=" + quantityModifyId + "&mode=del")
+}
+
 function addItem() {
     let id = document.getElementById('addItemItem').value;
     let q = document.getElementById('addItemQuantity').innerHTML;
@@ -100,19 +104,6 @@ function modAddQuantity(inc) {
         v = increment;
     }
     document.getElementById('addItemQuantity').innerText = v;
-}
-
-let itemToDelete = -1;
-
-function deleteItemRequest(id) {
-    itemToDelete = id;
-    document.getElementById('deleteNotifyName').innerHTML = getNameById(id);
-    showPopUpById('deleteNotify')
-}
-
-function deleteItem() {
-    hidePopUp()
-    updateItem(itemToDelete, 'del')
 }
 
 function updateItem(id, mode) {

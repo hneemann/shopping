@@ -35,7 +35,7 @@
         border-style: solid;
         border-color: darkgray;
         background-color: white;
-        padding: 0.5em;
+        padding: 1.5em 0.5em 0.5em 0.5em;
         visibility: hidden;
         position: fixed;
         top: 20%;
@@ -89,6 +89,11 @@ div.buttonRow {
     text-align: right;
 }
 
+img.buttonRow {
+    width: 1.75em;
+    padding-left: 3em;
+}
+
 .error {
     color: red;
 }
@@ -104,6 +109,13 @@ img.list {
 }
 
 img.normal {
+    width: 1.75em;
+}
+
+img.close {
+    position: absolute;
+    top: 0;
+    right: 0;
     width: 1.75em;
 }
 
