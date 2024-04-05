@@ -1,6 +1,6 @@
 /data/helmut/
 /cert.pem
-/key.pem
+/cert.key
 /.idea
 /shopping
 /update.sh

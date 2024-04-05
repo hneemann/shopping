@@ -107,7 +107,7 @@ func main() {
 	folder := flag.String("folder", "data", "data folder")
 	port := flag.Int("port", 8090, "port")
 	cert := flag.String("cert", "cert.pem", "certificate")
-	key := flag.String("key", "key.pem", "certificate")
+	key := flag.String("key", "cert.key", "certificate")
 	debug := flag.Bool("debug", false, "starts server in debug mode")
 	flag.Parse()
 
