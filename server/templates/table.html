@@ -18,15 +18,15 @@
     {{$hide := .HideCart}}
     {{range .Items }}
       {{- if and (.ShopMatches $shop) (gt .QuantityRequired 0.0) -}}
-        {{- if not (and $hide .Basket) -}}
+        {{- if not (and $hide .IsInCar) -}}
           {{- if not (eq .Category $lastCat) -}}
           <tr><th colspan="4">{{.Category}}</th></tr>
           {{- end}}
           <tr>
-            <td onclick="showSetQuantity('{{.QuantityRequired}}',{{.Id}});" {{if .Basket}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
+            <td onclick="showSetQuantity('{{.QuantityRequired}}',{{.Id}});" {{if .IsInCar}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
             <td class="number" onclick="showSetQuantity('{{.QuantityRequired}}',{{.Id}});">{{.QuantityRequired}}</td>
             <td>{{.Unit}}</td>
-            <td class="car"><img id="car_{{.Id}}" class="list" {{if .Basket}}src="/assets/eCar.svg"{{else}}src="/assets/sCar.svg"{{end}} onclick="updateItem({{.Id}},'car');"></td>
+            <td class="car"><img id="car_{{.Id}}" class="list" {{if .IsInCar}}src="/assets/eCar.svg"{{else}}src="/assets/sCar.svg"{{end}} onclick="updateItem({{.Id}},'car');"></td>
           </tr>
           {{- $lastCat = .Category -}}
         {{- end -}}

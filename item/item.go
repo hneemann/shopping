@@ -145,20 +145,20 @@ func (items Items) Save(file string) error {
 	return nil
 }
 
-func (items Items) PutInCar(id int) {
+func (items Items) ToggleInCar(id int) {
 	if item := items.ItemById(id); item != nil {
 		if item.QuantityRequired > 0 {
-			item.Basket = !item.Basket
-			log.Println("in car:", item.Name, item.Basket)
+			item.IsInCar = !item.IsInCar
+			log.Println("in car:", item.Name, item.IsInCar)
 		}
 	}
 }
 
-func (items Items) PutOutOfCar(id int) {
+func (items Items) DeleteFromList(id int) {
 	if item := items.ItemById(id); item != nil {
-		log.Println("out of car", item.Name)
+		log.Println("deleted", item.Name)
 		item.QuantityRequired = 0
-		item.Basket = false
+		item.IsInCar = false
 	}
 }
 
@@ -166,13 +166,13 @@ func (items Items) Payed() {
 	log.Println("Payed")
 	ti := time.Now()
 	for _, item := range items {
-		if item.QuantityRequired > 0 && item.Basket {
+		if item.QuantityRequired > 0 && item.IsInCar {
 			item.ShopHistory = append(item.ShopHistory, HistoryEntry{
 				ShopTime: ti,
 				Quantity: item.QuantityRequired,
 			})
 			item.QuantityRequired = 0
-			item.Basket = false
+			item.IsInCar = false
 		}
 	}
 }
@@ -198,13 +198,13 @@ func (items Items) ModQuantity(id, n int, increasedSpeed bool) {
 			log.Println("negative quantity avoided", item.Name)
 			item.QuantityRequired = 0
 		}
-		item.Basket = false
+		item.IsInCar = false
 	}
 }
 
 func (items Items) SomethingHidden() bool {
 	for _, item := range items {
-		if item.QuantityRequired > 0 && item.Basket {
+		if item.QuantityRequired > 0 && item.IsInCar {
 			return true
 		}
 	}
@@ -277,7 +277,7 @@ type Item struct {
 	uniqueName       string
 	Shops            []string
 	QuantityRequired float64
-	Basket           bool
+	IsInCar          bool   `json:"Basket"`
 	UnitDef          string `json:"Unit"`
 	unitCreated      bool
 	unitSingular     string
@@ -314,7 +314,7 @@ func (i *Item) UniqueName() string {
 func (i *Item) SetQuantity(quantity float64) {
 	log.Println("Set quantity", i.Name, quantity)
 	i.QuantityRequired = quantity
-	i.Basket = false
+	i.IsInCar = false
 }
 
 func (i *Item) Less(other *Item, cat func(Category) int) bool {
