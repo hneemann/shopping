@@ -62,9 +62,9 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 			if data.IdValid(id) {
 				switch mode {
 				case "car":
-					(*data).Shopped(id)
+					(*data).PutInCar(id)
 				case "del":
-					(*data).Delete(id)
+					(*data).PutOutOfCar(id)
 				case "set":
 					(*data).SetQuantity(id, toInt(query.Get("q")))
 				case "add":

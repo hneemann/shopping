@@ -145,12 +145,20 @@ func (items Items) Save(file string) error {
 	return nil
 }
 
-func (items Items) Shopped(id int) {
+func (items Items) PutInCar(id int) {
 	if item := items.ItemById(id); item != nil {
 		if item.QuantityRequired > 0 {
 			item.Basket = !item.Basket
-			log.Println("in basket:", item.Name, item.Basket)
+			log.Println("in car:", item.Name, item.Basket)
 		}
+	}
+}
+
+func (items Items) PutOutOfCar(id int) {
+	if item := items.ItemById(id); item != nil {
+		log.Println("out of car", item.Name)
+		item.QuantityRequired = 0
+		item.Basket = false
 	}
 }
 
@@ -166,14 +174,6 @@ func (items Items) Payed() {
 			item.QuantityRequired = 0
 			item.Basket = false
 		}
-	}
-}
-
-func (items Items) Delete(id int) {
-	if item := items.ItemById(id); item != nil {
-		log.Println("Delete", item.Name)
-		item.QuantityRequired = 0
-		item.Basket = false
 	}
 }
 
@@ -411,6 +411,7 @@ var unitPluralMap = map[string]string{
 	"Flasche": "Flaschen",
 	"Rolle":   "Rollen",
 	"Tube":    "Tuben",
+	"Sack":    "Säcke",
 }
 
 func (i *Item) createUnits() {
