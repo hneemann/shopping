@@ -25,7 +25,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
   <table>
     <tr>
       <td><label for="item">Kategorie:</label></td>
-      <td colspan="4">
+      <td colspan="5">
       <select class="value" id="category" onchange="addItemCatChanged()">
         {{$cs := .CategorySelected}}
         {{range $i,$e := .Categories }}<option value="{{$e}}"{{if eq $e $cs}} selected="selected"{{end}}>{{$e}}</option>{{end}}
@@ -34,7 +34,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
     </tr>
     <tr>
       <td><label for="item">Was:</label></td>
-      <td colspan="4">
+      <td colspan="5">
       <select class="value" name="item" id="addItemItem" onchange="addItemItemChanged()">
         {{$cs := .CategorySelected}}
         {{range .Items }}{{if eq .Category $cs }}<option value="{{.Id}}">{{.Name}}</option>{{end}}{{end}}
@@ -46,11 +46,12 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
       <td style="width:1%;">
         <img class="list" onclick="modAddQuantity(-1)" src="/assets/sub.svg">
       </td>
-      <td style="width:1%;" id="addItemQuantity">1</td>
+      <td style="width:2em;text-align:center;" id="addItemQuantity">1</td>
       <td style="width:1%;">
         <img class="list" onclick="modAddQuantity(1)" src="/assets/add.svg">
       </td>
       <td id="addItemUnit"></td>
+      <td><img class="list" onclick="modAddQuantity(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="modAddQuantity(0.25)" src="/assets/add.svg"></td>
     </tr>
   </table>
   <div class="buttonRow">
@@ -64,18 +65,19 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
   <table>
     <tr>
       <td style="width:30%;">Was:</td>
-      <td colspan="4" id="setQuantityName"></td>
+      <td colspan="5" id="setQuantityName"></td>
     </tr>
     <tr>
       <td>Wieviel:</td>
       <td style="width:1%;">
         <img class="list" onclick="setQuantityMod(-1)" src="/assets/sub.svg">
       </td>
-      <td style="width:1%;" id="setQuantityQuantity">1</td>
+      <td style="width:2em;text-align:center;" id="setQuantityQuantity">1</td>
       <td style="width:1%;">
         <img class="list" onclick="setQuantityMod(1)" src="/assets/add.svg">
       </td>
       <td style="text-align: left;" id="setQuantityUnit"></td>
+      <td><img class="list" onclick="setQuantityMod(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="setQuantityMod(0.25)" src="/assets/add.svg"></td>
     </tr>
   </table>
   <div class="buttonRow">

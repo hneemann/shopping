@@ -66,9 +66,9 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 				case "del":
 					(*data).DeleteFromList(id)
 				case "set":
-					(*data).SetQuantity(id, toInt(query.Get("q")))
+					(*data).SetQuantity(id, toFloat(query.Get("q")))
 				case "add":
-					(*data).ModQuantity(id, toInt(query.Get("q")), false)
+					(*data).ModQuantity(id, toFloat(query.Get("q")), false)
 				}
 			}
 		} else {
@@ -284,7 +284,7 @@ func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
 		if idStr != "" {
 			id := toInt(idStr)
 			if data.IdValid(id) {
-				data.ModQuantity(id, toInt(query.Get("n")), true)
+				data.ModQuantity(id, toFloat(query.Get("n")), true)
 				err := listAllRowTemp.Execute(w, data.ItemById(id))
 				if err != nil {
 					log.Println(err)

@@ -12,9 +12,9 @@ function showSetQuantity(quantity, id) {
 }
 
 function setQuantityMod(inc) {
-    let v = parseInt(document.getElementById('setQuantityQuantity').innerHTML);
-    v+=increment*inc;
-    if (v < increment) {
+    let v = parseFloat(document.getElementById('setQuantityQuantity').innerHTML);
+    v += increment * inc;
+    if (v <= 0) {
         v = increment;
     }
     document.getElementById('setQuantityQuantity').innerHTML = v;
@@ -22,7 +22,7 @@ function setQuantityMod(inc) {
 
 function setQuantityModify() {
     let text = document.getElementById('setQuantityQuantity').innerHTML;
-    let v = parseInt(text);
+    let v = parseFloat(text);
     updateTable("id=" + quantityModifyId + "&mode=set&q=" + v)
 }
 
@@ -98,9 +98,9 @@ function addItemItemChanged() {
 }
 
 function modAddQuantity(inc) {
-    let v = parseInt(document.getElementById('addItemQuantity').innerText);
-    v+=increment*inc;
-    if (v < increment) {
+    let v = parseFloat(document.getElementById('addItemQuantity').innerText);
+    v += increment * inc;
+    if (v <= 0) {
         v = increment;
     }
     document.getElementById('addItemQuantity').innerText = v;

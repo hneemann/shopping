@@ -177,22 +177,22 @@ func (items Items) Payed() {
 	}
 }
 
-func (items Items) SetQuantity(id, q int) {
+func (items Items) SetQuantity(id int, q float64) {
 	if item := items.ItemById(id); item != nil {
 		if q < 0 {
 			q = 0
 		}
-		item.SetQuantity(float64(q))
+		item.SetQuantity(q)
 	}
 }
 
-func (items Items) ModQuantity(id, n int, increasedSpeed bool) {
+func (items Items) ModQuantity(id int, n float64, increasedSpeed bool) {
 	if item := items.ItemById(id); item != nil {
 		log.Println("mod quantity", item.Name, n)
 		if item.Weight == 1 && increasedSpeed {
-			item.QuantityRequired += float64(n) * 50
+			item.QuantityRequired += n * 50
 		} else {
-			item.QuantityRequired += float64(n)
+			item.QuantityRequired += n
 		}
 		if item.QuantityRequired < 0.001 {
 			log.Println("negative quantity avoided", item.Name)
