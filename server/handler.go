@@ -20,7 +20,26 @@ var templateFS embed.FS
 //go:embed assets/*
 var AssetFS embed.FS
 
-var Templates = template.Must(template.New("").ParseFS(templateFS, "templates/*.html"))
+var Templates = template.Must(template.New("").Funcs(map[string]any{
+	"niceToStr": func(v float64) string {
+		t := math.Trunc(v)
+		p := strconv.Itoa(int(t))
+		if p == "0" {
+			p = ""
+		}
+		switch int(math.Round((v - t) * 4)) {
+		case 0:
+			return p
+		case 1:
+			return p + "¼"
+		case 2:
+			return p + "½"
+		case 3:
+			return p + "¾"
+		}
+		return strconv.FormatFloat(v, 'f', 2, 64)
+	},
+}).ParseFS(templateFS, "templates/*.html"))
 
 var mainTemp = Templates.Lookup("main.html")
 var tableTemp = Templates.Lookup("table.html")

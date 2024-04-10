@@ -7,22 +7,58 @@ function showSetQuantity(quantity, id) {
     let u = getUnitById(id);
     increment = u.increment;
     document.getElementById("setQuantityUnit").innerHTML = u.unit;
-    document.getElementById('setQuantityQuantity').innerHTML = "" + quantity;
+    document.getElementById('setQuantityQuantity').innerHTML = niceToString(quantity);
     showPopUpById('setQuantity');
 }
 
+function niceFromString(v) {
+    let r = 0;
+    let f = 0;
+    for (let i = 0; i < v.length; i++) {
+        let c = v.charAt(i);
+        if (c === "¼") {
+            f = 0.25;
+        } else if (c === "½") {
+            f = 0.5;
+        } else if (c === "¾") {
+            f = 0.75;
+        } else {
+            r = r * 10 + parseInt(c);
+        }
+    }
+    return r + f;
+}
+
+function niceToString(v) {
+    if (Number.isInteger(v)) {
+        return ""+v;
+    }
+    let t=Math.trunc(v);
+    let p=""+t
+    if (p==="0") {
+        p="";
+    }
+    switch (Math.round((v-t)*4)) {
+        case 0: return p;
+        case 1: return p+"¼";
+        case 2: return p+"½";
+        case 3: return p+"¾";
+    }
+    return ""+v;
+}
+
 function setQuantityMod(inc) {
-    let v = parseFloat(document.getElementById('setQuantityQuantity').innerHTML);
+    let v = niceFromString(document.getElementById('setQuantityQuantity').innerHTML);
     v += increment * inc;
     if (v <= 0) {
         v = increment;
     }
-    document.getElementById('setQuantityQuantity').innerHTML = v;
+    document.getElementById('setQuantityQuantity').innerHTML = niceToString(v);
 }
 
 function setQuantityModify() {
     let text = document.getElementById('setQuantityQuantity').innerHTML;
-    let v = parseFloat(text);
+    let v = niceFromString(text);
     updateTable("id=" + quantityModifyId + "&mode=set&q=" + v)
 }
 
@@ -32,7 +68,7 @@ function setQuantityDelete() {
 
 function addItem() {
     let id = document.getElementById('addItemItem').value;
-    let q = document.getElementById('addItemQuantity').innerHTML;
+    let q = niceFromString(document.getElementById('addItemQuantity').innerHTML);
     updateTable("id=" + id + "&mode=add&q=" + q)
 }
 
@@ -94,16 +130,16 @@ function addItemItemChanged() {
     let u = getUnitById(id);
     increment = u.increment;
     document.getElementById("addItemUnit").innerHTML = u.unit;
-    document.getElementById('addItemQuantity').innerHTML = "" + increment;
+    document.getElementById('addItemQuantity').innerHTML = niceToString(increment);
 }
 
 function modAddQuantity(inc) {
-    let v = parseFloat(document.getElementById('addItemQuantity').innerText);
+    let v = niceFromString(document.getElementById('addItemQuantity').innerText);
     v += increment * inc;
     if (v <= 0) {
         v = increment;
     }
-    document.getElementById('addItemQuantity').innerText = v;
+    document.getElementById('addItemQuantity').innerText = niceToString(v);
 }
 
 function updateItem(id, mode) {

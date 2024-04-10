@@ -24,7 +24,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
   <img class="close" onclick="hidePopUp()" src="/assets/cancle.svg"/>
   <table>
     <tr>
-      <td><label for="item">Kategorie:</label></td>
+      <td class="labelCol">Kategorie:</td>
       <td colspan="5">
       <select class="value" id="category" onchange="addItemCatChanged()">
         {{$cs := .CategorySelected}}
@@ -33,7 +33,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
       </td>
     </tr>
     <tr>
-      <td><label for="item">Was:</label></td>
+      <td class="labelCol">Was:</td>
       <td colspan="5">
       <select class="value" name="item" id="addItemItem" onchange="addItemItemChanged()">
         {{$cs := .CategorySelected}}
@@ -42,7 +42,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
       </td>
     </tr>
     <tr>
-      <td>Wieviel:</td>
+      <td class="labelCol">Wieviel:</td>
       <td style="width:1%;">
         <img class="list" onclick="modAddQuantity(-1)" src="/assets/sub.svg">
       </td>
@@ -51,7 +51,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
         <img class="list" onclick="modAddQuantity(1)" src="/assets/add.svg">
       </td>
       <td id="addItemUnit"></td>
-      <td><img class="list" onclick="modAddQuantity(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="modAddQuantity(0.25)" src="/assets/add.svg"></td>
+      <td class="fineInc"><img class="list" onclick="modAddQuantity(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="modAddQuantity(0.25)" src="/assets/add.svg"></td>
     </tr>
   </table>
   <div class="buttonRow">
@@ -64,11 +64,11 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
   <img class="close" onclick="hidePopUp()" src="/assets/cancle.svg"/>
   <table>
     <tr>
-      <td style="width:30%;">Was:</td>
+      <td class="labelCol">Was:</td>
       <td colspan="5" id="setQuantityName"></td>
     </tr>
     <tr>
-      <td>Wieviel:</td>
+      <td class="labelCol">Wieviel:</td>
       <td style="width:1%;">
         <img class="list" onclick="setQuantityMod(-1)" src="/assets/sub.svg">
       </td>
@@ -77,7 +77,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
         <img class="list" onclick="setQuantityMod(1)" src="/assets/add.svg">
       </td>
       <td style="text-align: left;" id="setQuantityUnit"></td>
-      <td><img class="list" onclick="setQuantityMod(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="setQuantityMod(0.25)" src="/assets/add.svg"></td>
+      <td class="fineInc"><img class="list" onclick="setQuantityMod(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="setQuantityMod(0.25)" src="/assets/add.svg"></td>
     </tr>
   </table>
   <div class="buttonRow">

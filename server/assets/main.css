@@ -102,6 +102,14 @@ td.car {
     text-align: center;
 }
 
+td.labelCol {
+    width: 1%;
+}
+
+td.fineInc {
+    white-space: nowrap;
+}
+
 img.list {
     width: 1.2em;
     position: relative;
