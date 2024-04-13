@@ -12,39 +12,19 @@ function showSetQuantity(quantity, id) {
 }
 
 function niceFromString(v) {
-    let r = 0;
-    let f = 0;
-    for (let i = 0; i < v.length; i++) {
-        let c = v.charAt(i);
-        if (c === "¼") {
-            f = 0.25;
-        } else if (c === "½") {
-            f = 0.5;
-        } else if (c === "¾") {
-            f = 0.75;
-        } else {
-            r = r * 10 + parseInt(c);
-        }
-    }
-    return r + f;
+    return parseFloat(v);
 }
 
+const eps = 0.0001;
+
 function niceToString(v) {
-    if (Number.isInteger(v)) {
-        return ""+v;
+    if (Math.abs(v - Math.round(v)) < eps) {
+        return "" + Math.round(v);
     }
-    let t=Math.trunc(v);
-    let p=""+t
-    if (p==="0") {
-        p="";
+    if (Math.abs(v * 10 - Math.round(v * 10)) < eps) {
+        return v.toFixed(1);
     }
-    switch (Math.round((v-t)*4)) {
-        case 0: return p;
-        case 1: return p+"¼";
-        case 2: return p+"½";
-        case 3: return p+"¾";
-    }
-    return ""+v;
+    return v.toFixed(2);
 }
 
 function setQuantityMod(inc) {
@@ -120,6 +100,8 @@ function getUnitById(id) {
     let i = 1;
     if (unit === "g" || unit === "ml") {
         i = 50;
+    } else if (unit === "kg" || unit === "Kilo" || unit === "l") {
+        i = 0.5;
     }
     return {unit: unit, increment: i};
 }

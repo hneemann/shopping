@@ -25,7 +25,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
   <table>
     <tr>
       <td class="labelCol">Kategorie:</td>
-      <td colspan="5">
+      <td colspan="4">
       <select class="value" id="category" onchange="addItemCatChanged()">
         {{$cs := .CategorySelected}}
         {{range $i,$e := .Categories }}<option value="{{$e}}"{{if eq $e $cs}} selected="selected"{{end}}>{{$e}}</option>{{end}}
@@ -34,7 +34,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
     </tr>
     <tr>
       <td class="labelCol">Was:</td>
-      <td colspan="5">
+      <td colspan="4">
       <select class="value" name="item" id="addItemItem" onchange="addItemItemChanged()">
         {{$cs := .CategorySelected}}
         {{range .Items }}{{if eq .Category $cs }}<option value="{{.Id}}">{{.Name}}</option>{{end}}{{end}}
@@ -51,7 +51,6 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
         <img class="list" onclick="modAddQuantity(1)" src="/assets/add.svg">
       </td>
       <td id="addItemUnit"></td>
-      <td class="fineInc"><img class="list" onclick="modAddQuantity(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="modAddQuantity(0.25)" src="/assets/add.svg"></td>
     </tr>
   </table>
   <div class="buttonRow">
@@ -65,7 +64,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
   <table>
     <tr>
       <td class="labelCol">Was:</td>
-      <td colspan="5" id="setQuantityName"></td>
+      <td colspan="4" id="setQuantityName"></td>
     </tr>
     <tr>
       <td class="labelCol">Wieviel:</td>
@@ -77,7 +76,6 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
         <img class="list" onclick="setQuantityMod(1)" src="/assets/add.svg">
       </td>
       <td style="text-align: left;" id="setQuantityUnit"></td>
-      <td class="fineInc"><img class="list" onclick="setQuantityMod(-0.25)" src="/assets/sub.svg">¼<img class="list" onclick="setQuantityMod(0.25)" src="/assets/add.svg"></td>
     </tr>
   </table>
   <div class="buttonRow">

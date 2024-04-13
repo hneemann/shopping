@@ -189,11 +189,16 @@ func (items Items) SetQuantity(id int, q float64) {
 func (items Items) ModQuantity(id int, n float64, increasedSpeed bool) {
 	if item := items.ItemById(id); item != nil {
 		log.Println("mod quantity", item.Name, n)
-		if item.Weight == 1 && increasedSpeed {
-			item.QuantityRequired += n * 50
-		} else {
-			item.QuantityRequired += n
+		f := 1.0
+		if increasedSpeed {
+			switch strings.ToLower(item.Unit()) {
+			case "g", "ml":
+				f = 50
+			case "kg", "l", "kilo":
+				f = 0.5
+			}
 		}
+		item.QuantityRequired += n * f
 		if item.QuantityRequired < 0.001 {
 			log.Println("negative quantity avoided", item.Name)
 			item.QuantityRequired = 0
