@@ -93,17 +93,13 @@ let increment = 1
 
 function getUnitById(id) {
     let unit = "";
+    let incr = 1.0
     let item = document.getElementById(id);
     if (item !== null) {
         unit = item.getAttribute("data-u")
+        incr = parseFloat(item.getAttribute("data-inc"))
     }
-    let i = 1;
-    if (unit === "g" || unit === "ml") {
-        i = 50;
-    } else if (unit === "kg" || unit === "Kilo" || unit === "l") {
-        i = 0.5;
-    }
-    return {unit: unit, increment: i};
+    return {unit: unit, increment: incr};
 }
 
 function addItemItemChanged() {

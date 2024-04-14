@@ -85,7 +85,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
 </div>
 
 <datalist id="items">
-  {{range .Items }}<option id="{{.Id}}" data-cat="{{.Category}}" data-u="{{.Unit}}" value="{{.UniqueName}}">{{.UniqueName}}</option>
+  {{range .Items }}<option id="{{.Id}}" data-cat="{{.Category}}" data-u="{{.Unit}}" data-inc="{{.Increment}}" value="{{.UniqueName}}">{{.UniqueName}}</option>
   {{end}}
 </datalist>
 

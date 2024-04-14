@@ -186,17 +186,12 @@ func (items Items) SetQuantity(id int, q float64) {
 	}
 }
 
-func (items Items) ModQuantity(id int, n float64, increasedSpeed bool) {
+func (items Items) ModQuantity(id int, n float64, useUnitIncrement bool) {
 	if item := items.ItemById(id); item != nil {
 		log.Println("mod quantity", item.Name, n)
 		f := 1.0
-		if increasedSpeed {
-			switch strings.ToLower(item.Unit()) {
-			case "g", "ml":
-				f = 50
-			case "kg", "l", "kilo":
-				f = 0.5
-			}
+		if useUnitIncrement {
+			f = item.Increment()
 		}
 		item.QuantityRequired += n * f
 		if item.QuantityRequired < 0.001 {
@@ -443,6 +438,17 @@ func (i *Item) createUnits() {
 			i.unitPlural = i.unitSingular
 		}
 	}
+}
+
+func (i *Item) Increment() float64 {
+	f := 1.0
+	switch strings.ToLower(i.UnitDef) {
+	case "g", "ml":
+		f = 50
+	case "kg", "l", "kilo":
+		f = 0.5
+	}
+	return f
 }
 
 func Load(file string) (*Items, error) {
