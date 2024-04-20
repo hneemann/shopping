@@ -87,9 +87,13 @@ func (s *sessionCache[S]) createSessionId(user string, pass string) (string, err
 	}
 
 	for id, sce := range s.sessions {
-		if sce.user == user && s.sm.CheckPassword(user, pass) {
-			sce.lastAccess = time.Now()
-			return id, nil
+		if sce.user == user {
+			if s.sm.CheckPassword(user, pass) {
+				sce.lastAccess = time.Now()
+				return id, nil
+			} else {
+				return "", errors.New("wrong password")
+			}
 		}
 	}
 
@@ -167,7 +171,11 @@ func (s *sessionCache[D]) doHandler(w http.ResponseWriter, r *http.Request, pare
 			nc := context.WithValue(r.Context(), "data", se.data)
 			parent.ServeHTTP(w, r.WithContext(nc))
 			return true
+		} else {
+			log.Println("no session found")
 		}
+	} else {
+		log.Println("no cookie send")
 	}
 	return false
 }
