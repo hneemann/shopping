@@ -229,7 +229,7 @@ func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http
 
 			var id string
 			if id, err = sc.createSessionId(user, pass); err == nil {
-				http.SetCookie(w, &http.Cookie{Value: id, Name: "id", Expires: time.Now().Add(sc.lifeTime)})
+				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
 			}
@@ -281,7 +281,7 @@ func RegisterHandler[S any](sc *sessionCache[S], registerTemp *template.Template
 
 			var id string
 			if id, err = sc.registerUser(user, pass, pass2); err == nil {
-				http.SetCookie(w, &http.Cookie{Value: id, Name: "id", Expires: time.Now().Add(sc.lifeTime)})
+				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
 			}
