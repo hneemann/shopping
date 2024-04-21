@@ -78,7 +78,7 @@ func (s *sessionCache[S]) getSession(id string) *sessionCacheEntry[S] {
 	return nil
 }
 
-func (s *sessionCache[S]) createSessionId(user string, pass string) (string, error) {
+func (s *sessionCache[S]) CreateSessionId(user string, pass string) (string, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -90,6 +90,7 @@ func (s *sessionCache[S]) createSessionId(user string, pass string) (string, err
 		if sce.user == user {
 			if s.sm.CheckPassword(user, pass) {
 				sce.lastAccess = time.Now()
+				log.Println("gained access to an existing session")
 				return id, nil
 			} else {
 				return "", errors.New("wrong password")
@@ -161,7 +162,10 @@ func (s *sessionCache[S]) Close() {
 	s.sm = nil
 }
 
-func (s *sessionCache[D]) doHandler(w http.ResponseWriter, r *http.Request, parent http.Handler) bool {
+// CallHandlerWithData calls the parent handler with the data from the session.
+// The data is stored in the context with the key "data".
+// If no session is found it returns false.
+func (s *sessionCache[D]) CallHandlerWithData(w http.ResponseWriter, r *http.Request, parent http.Handler) bool {
 	if c, err := r.Cookie("id"); err == nil {
 		id := c.Value
 		if se := s.getSession(id); se != nil {
@@ -172,7 +176,7 @@ func (s *sessionCache[D]) doHandler(w http.ResponseWriter, r *http.Request, pare
 			parent.ServeHTTP(w, r.WithContext(nc))
 			return true
 		} else {
-			log.Println("no session found")
+			log.Println("no matching session found")
 		}
 	} else {
 		log.Println("no cookie send")
@@ -198,7 +202,7 @@ func CheckSessionFunc[S any](sc *sessionCache[S], parent http.HandlerFunc) http.
 // CheckSession is a wrapper that redirects to /login if no valid session id is found
 func CheckSession[S any](sc *sessionCache[S], parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if ok := sc.doHandler(w, r, parent); !ok {
+		if ok := sc.CallHandlerWithData(w, r, parent); !ok {
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 	}
@@ -207,15 +211,17 @@ func CheckSession[S any](sc *sessionCache[S], parent http.Handler) http.HandlerF
 // CheckSessionRest is a wrapper that returns a 403 Forbidden if no valid session id is found
 func CheckSessionRest[S any](sc *sessionCache[S], parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if ok := sc.doHandler(w, r, parent); !ok {
+		if ok := sc.CallHandlerWithData(w, r, parent); !ok {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 		}
 	}
 }
 
-// LoginHandler is a handler that handles the login.
+// LoginHandler is a handler that does the login.
 // The given template is used to render the login page.
 // It needs to contain a form with the fields username and password.
+// If the login is successful a cookie with the session id is set and
+// the user is redirected to /.
 func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http.HandlerFunc {
 	if loginTemp == nil {
 		panic("login template is nil")
@@ -228,7 +234,7 @@ func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http
 			pass := r.FormValue("password")
 
 			var id string
-			if id, err = sc.createSessionId(user, pass); err == nil {
+			if id, err = sc.CreateSessionId(user, pass); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
@@ -241,6 +247,9 @@ func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http
 	}
 }
 
+// LogoutHandler is a handler that does the logout.
+// The given template is used to render the logout confirmation page.
+// The cookie with the session id is deleted.
 func LogoutHandler[S any](sc *sessionCache[S], logoutTemp *template.Template) http.HandlerFunc {
 	if logoutTemp == nil {
 		panic("logout template is nil")
