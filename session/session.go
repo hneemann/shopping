@@ -11,27 +11,30 @@ import (
 	"time"
 )
 
+type Persist[D any] interface {
+	Load() (*D, error)
+	Save(d *D) error
+}
+
 type Manager[D any] interface {
-	// CreateUser is called in a new user needs to be created
-	CreateUser(user string, pass string) (*D, error)
+	// CreateUser is called if a new user needs to be created
+	CreateUser(user, pass string) (*D, error)
 	// CheckPassword is called to check if the password is correct
-	CheckPassword(user string, pass string) bool
-	// RestoreData is called to restore the data for a user
-	// In most cases this will mean to load a file or similar
-	RestoreData(user string, pass string) (*D, error)
-	// PersistData is called to save the data for a user
-	// In most cases this will mean to write a file or similar
-	PersistData(user string, data *D)
+	CheckPassword(user, pass string) bool
+	// CreatePersist create the persist interface used to
+	// restore and persist the user data
+	CreatePersist(user, pass string) (Persist[D], error)
 }
 
 type sessionCacheEntry[D any] struct {
 	mutex      sync.Mutex
 	lastAccess time.Time
 	user       string
+	persist    Persist[D]
 	data       *D
 }
 
-type sessionCache[D any] struct {
+type Cache[D any] struct {
 	mutex    sync.Mutex
 	lifeTime time.Duration
 	sessions map[string]*sessionCacheEntry[D]
@@ -40,9 +43,9 @@ type sessionCache[D any] struct {
 }
 
 // NewSessionCache creates a new session cache
-func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *sessionCache[S] {
+func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *Cache[S] {
 	shutDown := make(chan struct{})
-	sc := sessionCache[S]{
+	sc := Cache[S]{
 		sessions: make(map[string]*sessionCacheEntry[S]),
 		sm:       sm,
 		shutDown: shutDown,
@@ -63,7 +66,7 @@ func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *sessi
 	return &sc
 }
 
-func (s *sessionCache[S]) getSession(id string) *sessionCacheEntry[S] {
+func (s *Cache[S]) getSession(id string) *sessionCacheEntry[S] {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -71,14 +74,17 @@ func (s *sessionCache[S]) getSession(id string) *sessionCacheEntry[S] {
 		if time.Since(sce.lastAccess) < s.lifeTime {
 			return sce
 		} else {
-			s.sm.PersistData(sce.user, sce.data)
+			err := sce.persist.Save(sce.data)
+			if err != nil {
+				log.Println(err)
+			}
 			delete(s.sessions, id)
 		}
 	}
 	return nil
 }
 
-func (s *sessionCache[S]) CreateSessionId(user string, pass string) (string, error) {
+func (s *Cache[S]) CreateSessionId(user string, pass string) (string, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -86,31 +92,36 @@ func (s *sessionCache[S]) CreateSessionId(user string, pass string) (string, err
 		return "", errors.New("session manager closed")
 	}
 
+	if !s.sm.CheckPassword(user, pass) {
+		return "", errors.New("wrong password")
+	}
+
 	for id, sce := range s.sessions {
 		if sce.user == user {
-			if s.sm.CheckPassword(user, pass) {
-				sce.lastAccess = time.Now()
-				log.Println("gained access to an existing session")
-				return id, nil
-			} else {
-				return "", errors.New("wrong password")
-			}
+			sce.lastAccess = time.Now()
+			log.Println("gained access to an existing session")
+			return id, nil
 		}
 	}
 
-	data, err := s.sm.RestoreData(user, pass)
+	p, err := s.sm.CreatePersist(user, pass)
+	if err != nil {
+		return "", err
+	}
+
+	data, err := p.Load()
 	if err != nil {
 		return "", err
 	}
 	id := createRandomString()
 
-	ses := &sessionCacheEntry[S]{lastAccess: time.Now(), data: data, user: user}
+	ses := &sessionCacheEntry[S]{lastAccess: time.Now(), data: data, user: user, persist: p}
 	s.sessions[id] = ses
 
 	return id, nil
 }
 
-func (s *sessionCache[S]) registerUser(user, pass, pass2 string) (string, error) {
+func (s *Cache[S]) registerUser(user, pass, pass2 string) (string, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -126,15 +137,20 @@ func (s *sessionCache[S]) registerUser(user, pass, pass2 string) (string, error)
 	if err != nil {
 		return "", err
 	}
+	p, err := s.sm.CreatePersist(user, pass)
+	if err != nil {
+		return "", err
+	}
+
 	id := createRandomString()
 
-	ses := &sessionCacheEntry[S]{lastAccess: time.Now(), data: data, user: user}
+	ses := &sessionCacheEntry[S]{lastAccess: time.Now(), data: data, user: user, persist: p}
 	s.sessions[id] = ses
 
 	return id, nil
 }
 
-func (s *sessionCache[S]) checkSessions() {
+func (s *Cache[S]) checkSessions() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -144,20 +160,26 @@ func (s *sessionCache[S]) checkSessions() {
 
 	for id, sce := range s.sessions {
 		if time.Since(sce.lastAccess) > s.lifeTime {
-			s.sm.PersistData(sce.user, sce.data)
+			err := sce.persist.Save(sce.data)
+			if err != nil {
+				log.Println(err)
+			}
 			delete(s.sessions, id)
 		}
 	}
 }
 
-func (s *sessionCache[S]) Close() {
+func (s *Cache[S]) Close() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	close(s.shutDown)
 
 	for _, sce := range s.sessions {
-		s.sm.PersistData(sce.user, sce.data)
+		err := sce.persist.Save(sce.data)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 	s.sm = nil
 }
@@ -165,7 +187,7 @@ func (s *sessionCache[S]) Close() {
 // CallHandlerWithData calls the parent handler with the data from the session.
 // The data is stored in the context with the key "data".
 // If no session is found it returns false.
-func (s *sessionCache[D]) CallHandlerWithData(w http.ResponseWriter, r *http.Request, parent http.Handler) bool {
+func (s *Cache[D]) CallHandlerWithData(w http.ResponseWriter, r *http.Request, parent http.Handler) bool {
 	if c, err := r.Cookie("id"); err == nil {
 		id := c.Value
 		if se := s.getSession(id); se != nil {
@@ -195,23 +217,23 @@ func createRandomString() string {
 }
 
 // CheckSessionFunc is a wrapper that redirects to /login if no valid session id is found
-func CheckSessionFunc[S any](sc *sessionCache[S], parent http.HandlerFunc) http.HandlerFunc {
-	return CheckSession(sc, parent)
+func (s *Cache[S]) CheckSessionFunc(parent http.HandlerFunc) http.HandlerFunc {
+	return s.CheckSession(parent)
 }
 
 // CheckSession is a wrapper that redirects to /login if no valid session id is found
-func CheckSession[S any](sc *sessionCache[S], parent http.Handler) http.HandlerFunc {
+func (s *Cache[S]) CheckSession(parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if ok := sc.CallHandlerWithData(w, r, parent); !ok {
+		if ok := s.CallHandlerWithData(w, r, parent); !ok {
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 	}
 }
 
 // CheckSessionRest is a wrapper that returns a 403 Forbidden if no valid session id is found
-func CheckSessionRest[S any](sc *sessionCache[S], parent http.Handler) http.HandlerFunc {
+func (s *Cache[S]) CheckSessionRest(parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if ok := sc.CallHandlerWithData(w, r, parent); !ok {
+		if ok := s.CallHandlerWithData(w, r, parent); !ok {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 		}
 	}
@@ -222,7 +244,7 @@ func CheckSessionRest[S any](sc *sessionCache[S], parent http.Handler) http.Hand
 // It needs to contain a form with the fields username and password.
 // If the login is successful a cookie with the session id is set and
 // the user is redirected to /.
-func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http.HandlerFunc {
+func (s *Cache[S]) LoginHandler(loginTemp *template.Template) http.HandlerFunc {
 	if loginTemp == nil {
 		panic("login template is nil")
 	}
@@ -234,7 +256,7 @@ func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http
 			pass := r.FormValue("password")
 
 			var id string
-			if id, err = sc.CreateSessionId(user, pass); err == nil {
+			if id, err = s.CreateSessionId(user, pass); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
@@ -250,7 +272,7 @@ func LoginHandler[S any](sc *sessionCache[S], loginTemp *template.Template) http
 // LogoutHandler is a handler that does the logout.
 // The given template is used to render the logout confirmation page.
 // The cookie with the session id is deleted.
-func LogoutHandler[S any](sc *sessionCache[S], logoutTemp *template.Template) http.HandlerFunc {
+func (s *Cache[S]) LogoutHandler(logoutTemp *template.Template) http.HandlerFunc {
 	if logoutTemp == nil {
 		panic("logout template is nil")
 	}
@@ -258,11 +280,14 @@ func LogoutHandler[S any](sc *sessionCache[S], logoutTemp *template.Template) ht
 	return func(w http.ResponseWriter, r *http.Request) {
 		if c, err := r.Cookie("id"); err == nil {
 			id := c.Value
-			if se := sc.getSession(id); se != nil {
+			if se := s.getSession(id); se != nil {
 				se.mutex.Lock()
 				defer se.mutex.Unlock()
-				sc.sm.PersistData(se.user, se.data)
-				delete(sc.sessions, id)
+				err := se.persist.Save(se.data)
+				if err != nil {
+					log.Println(err)
+				}
+				delete(s.sessions, id)
 			}
 			http.SetCookie(w, &http.Cookie{Value: "", Name: "id", Expires: time.Now().Add(-time.Hour)})
 		}
@@ -273,10 +298,10 @@ func LogoutHandler[S any](sc *sessionCache[S], logoutTemp *template.Template) ht
 	}
 }
 
-// RegisterHandler is a handler that handles the registration.
+// RegisterHandler is th handler to handle the registration.
 // The given template is used to render the registration page.
 // It needs to contain a form with the fields username, password and password2.
-func RegisterHandler[S any](sc *sessionCache[S], registerTemp *template.Template) http.HandlerFunc {
+func (s *Cache[S]) RegisterHandler(registerTemp *template.Template) http.HandlerFunc {
 	if registerTemp == nil {
 		panic("register template is nil")
 	}
@@ -289,7 +314,7 @@ func RegisterHandler[S any](sc *sessionCache[S], registerTemp *template.Template
 			pass2 := r.FormValue("password2")
 
 			var id string
-			if id, err = sc.registerUser(user, pass, pass2); err == nil {
+			if id, err = s.registerUser(user, pass, pass2); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
