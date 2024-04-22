@@ -15,8 +15,8 @@ import (
 	"time"
 )
 
-func CreatePersist(folder, pass string) (session.Persist[item.Items], error) {
-	return &persist{file: filepath.Join(folder, "data.json"), base: filepath.Base(folder)}, nil
+func CreatePersist(userFolder, pass string) (session.Persist[item.Items], error) {
+	return &persist{file: filepath.Join(userFolder, "data.json"), base: filepath.Base(userFolder)}, nil
 }
 
 type persist struct {
@@ -35,14 +35,15 @@ func (p *persist) Save(items *item.Items) error {
 }
 
 func main() {
-	folder := flag.String("folder", "data", "data folder")
+	dataFolder := flag.String("folder", "data", "data folder")
 	port := flag.Int("port", 8090, "port")
 	cert := flag.String("cert", "cert.pem", "certificate")
 	key := flag.String("key", "cert.key", "certificate")
 	debug := flag.Bool("debug", false, "starts server in debug mode")
 	flag.Parse()
 
-	sc := session.NewPersistSessionCache[item.Items](*folder, CreatePersist, 30*time.Minute)
+	sc := session.NewPersistSessionCache[item.Items](*dataFolder, CreatePersist, 30*time.Minute)
+	defer sc.Close()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/login", sc.LoginHandler(server.Templates.Lookup("login.html")))
@@ -71,8 +72,6 @@ func main() {
 	go func() {
 		<-c
 		log.Print("interrupted")
-
-		sc.Close()
 
 		err := serv.Shutdown(context.Background())
 		if err != nil {

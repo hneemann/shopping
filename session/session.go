@@ -11,11 +11,18 @@ import (
 	"time"
 )
 
+// Persist is the interface that needs to be implemented to persist the session data
 type Persist[D any] interface {
+	// Load is called to load the data from the persistant storage
 	Load() (*D, error)
+	// Save is called to save the data to the persistant storage
 	Save(d *D) error
 }
 
+// Manager is the interface that needs to be implemented to manage the session data
+// D is the type of the data that is stored in the session
+// The manager is responsible for creating new users, checking the password and
+// creating the persist interface for the user
 type Manager[D any] interface {
 	// CreateUser is called if a new user needs to be created
 	CreateUser(user, pass string) (*D, error)
@@ -34,15 +41,20 @@ type sessionCacheEntry[D any] struct {
 	data       *D
 }
 
+// Cache is the session cache
 type Cache[D any] struct {
 	mutex    sync.Mutex
 	lifeTime time.Duration
 	sessions map[string]*sessionCacheEntry[D]
 	sm       Manager[D]
 	shutDown chan struct{}
+	loginUrl string
+	mainUrl  string
 }
 
 // NewSessionCache creates a new session cache
+// sm is the session manager
+// sessionLifeTime is the time a session is valid
 func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *Cache[S] {
 	shutDown := make(chan struct{})
 	sc := Cache[S]{
@@ -50,6 +62,8 @@ func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *Cache
 		sm:       sm,
 		shutDown: shutDown,
 		lifeTime: sessionLifeTime,
+		loginUrl: "/login",
+		mainUrl:  "/",
 	}
 
 	go func() {
@@ -64,6 +78,18 @@ func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *Cache
 	}()
 
 	return &sc
+}
+
+// SetLoginUrl sets the url to redirect to if no session is found
+func (s *Cache[S]) SetLoginUrl(url string) *Cache[S] {
+	s.loginUrl = url
+	return s
+}
+
+// SetMainUrl sets the url to redirect to after login
+func (s *Cache[S]) SetMainUrl(url string) *Cache[S] {
+	s.mainUrl = url
+	return s
 }
 
 func (s *Cache[S]) getSession(id string) *sessionCacheEntry[S] {
@@ -169,6 +195,11 @@ func (s *Cache[S]) checkSessions() {
 	}
 }
 
+// Close closes the session cache
+// It saves all data and stops the session cache
+// This function should be called before the program exits
+// to save all the session data. It also stops the go routine
+// that periodically checks the session lifetime.
 func (s *Cache[S]) Close() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -225,7 +256,7 @@ func (s *Cache[S]) CheckSessionFunc(parent http.HandlerFunc) http.HandlerFunc {
 func (s *Cache[S]) CheckSession(parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if ok := s.CallHandlerWithData(w, r, parent); !ok {
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, s.loginUrl, http.StatusFound)
 		}
 	}
 }
@@ -258,7 +289,7 @@ func (s *Cache[S]) LoginHandler(loginTemp *template.Template) http.HandlerFunc {
 			var id string
 			if id, err = s.CreateSessionId(user, pass); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
-				http.Redirect(w, r, "/", http.StatusFound)
+				http.Redirect(w, r, s.mainUrl, http.StatusFound)
 				return
 			}
 		}
@@ -316,7 +347,7 @@ func (s *Cache[S]) RegisterHandler(registerTemp *template.Template) http.Handler
 			var id string
 			if id, err = s.registerUser(user, pass, pass2); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
-				http.Redirect(w, r, "/", http.StatusFound)
+				http.Redirect(w, r, s.mainUrl, http.StatusFound)
 				return
 			}
 		}
