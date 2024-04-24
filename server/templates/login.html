@@ -7,9 +7,11 @@
   <link rel="stylesheet" type="text/css" href="/assets/main.css"/>
 </head>
 <body>
-  <h3>Login Einkaufsliste</h3>
   <form action="/login" method="post">
-    <table>
+    <table class="mainTable">
+    <tr>
+      <td colspan="2" style="font-size:115%;font-weight:bold;text-align:center">Login Einkaufsliste</td>
+    </tr>
     <tr>
       <td><label for="username">Benutzername</label></td>
       <td><input type="text" name="username" id="username" placeholder="Username"></td>
@@ -20,13 +22,15 @@
     </tr>
     <tr>
       <td></td>
-      <td><input type="submit" value="Login"></td>
+      <td style="text-align:right"><input type="submit" value="Login"></td>
+    </tr>
+    {{if .}}
+      <tr><td colspan="2" style="color:red">{{.}}</td></tr>
+    {{end}}
+    <tr>
+      <td colspan="2"><a href="/register">Konto Anlegen</a></td>
     </tr>
     </table>
   </form>
-  {{if .}}
-    <p style="color:red">{{.}}</p>
-  {{end}}
-  <p><a href="/register">Konto Anlegen</a></p>
 </body>
 </html>
