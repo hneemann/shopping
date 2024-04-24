@@ -8,6 +8,8 @@ import (
 
 type FileSystemFactory func(user string, create bool) (fileSys.FileSystem, error)
 
+// NewFileSystemFactory creates a new FileSystemFactory that creates
+// files on disk in the given folder.
 func NewFileSystemFactory(folder string) FileSystemFactory {
 	return func(user string, create bool) (fileSys.FileSystem, error) {
 		dir := filepath.Join(folder, user)
@@ -32,6 +34,8 @@ func NewFileSystemFactory(folder string) FileSystemFactory {
 	}
 }
 
+// NewMemoryFileSystemFactory creates a new FileSystemFactory that creates
+// files in memory only. Mainly used for testing.
 func NewMemoryFileSystemFactory() FileSystemFactory {
 	uf := make(map[string]fileSys.MemoryFileSystem)
 	return func(user string, create bool) (fileSys.FileSystem, error) {

@@ -152,7 +152,7 @@ func (s *Cache[S]) registerUser(user, pass, pass2 string) (string, error) {
 	defer s.mutex.Unlock()
 
 	if pass != pass2 {
-		return "", errors.New("passwords do not match")
+		return "", errors.New("passwords are not equal")
 	}
 
 	if s.sm == nil {
@@ -215,6 +215,16 @@ func (s *Cache[S]) Close() {
 	s.sm = nil
 }
 
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func createRandomString() string {
+	b := make([]byte, 20)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}
+
 // CallHandlerWithData calls the parent handler with the data from the session.
 // The data is stored in the context with the key "data".
 // If no session is found it returns false.
@@ -235,16 +245,6 @@ func (s *Cache[D]) CallHandlerWithData(w http.ResponseWriter, r *http.Request, p
 		log.Println("no cookie send")
 	}
 	return false
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-func createRandomString() string {
-	b := make([]byte, 20)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
 }
 
 // CheckSessionFunc is a wrapper that redirects to /login if no valid session id is found
