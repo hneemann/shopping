@@ -2,66 +2,66 @@ package session
 
 import (
 	"errors"
+	"github.com/hneemann/shopping/session/fileSys"
 	"golang.org/x/crypto/bcrypt"
-	"os"
-	"path/filepath"
-	"time"
+	"log"
 	"unicode"
 )
 
-type PersistFactory[D any] func(userFolder, pass string) (Persist[D], error)
+type FilePersist[D any] interface {
+	Load(f fileSys.FileSystem) (*D, error)
+	Save(f fileSys.FileSystem, d *D) error
+}
 
-func NewDataManager[D any](dataFolder string, persist PersistFactory[D]) *DataManager[D] {
-	return &DataManager[D]{dataFolder: dataFolder, persistFactory: persist}
+func NewDataManager[D any](fsf FileSystemFactory, fp FilePersist[D]) *DataManager[D] {
+	return &DataManager[D]{filePersist: fp, fileSystemFactory: fsf}
 }
 
 type DataManager[D any] struct {
-	dataFolder     string
-	persistFactory PersistFactory[D]
+	filePersist       FilePersist[D]
+	fileSystemFactory FileSystemFactory
+	crypt             bool
 }
 
 var _ Manager[int] = &DataManager[int]{}
 
-func (s *DataManager[D]) CreateUser(user string, pass string) (*D, error) {
+func (dm *DataManager[D]) EnableEncryption() *DataManager[D] {
+	dm.crypt = true
+	return dm
+}
+
+func (dm *DataManager[D]) CreateUser(user string, pass string) (*D, error) {
 	for _, r := range user {
 		if !(unicode.IsLetter(r) || unicode.IsDigit(r)) {
 			return nil, errors.New("username not valid")
 		}
 	}
 
-	userFolder := filepath.Join(s.dataFolder, user)
-	if _, err := os.Stat(userFolder); err != nil {
-		if os.IsNotExist(err) {
-			err = os.Mkdir(userFolder, 0755)
-			if err != nil {
-				return nil, err
-			}
-
-			bcryptPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-			if err != nil {
-				return nil, err
-			}
-			userId := filepath.Join(userFolder, "id")
-			err = os.WriteFile(userId, bcryptPass, 0666)
-			if err != nil {
-				return nil, err
-			}
-			var items D
-			return &items, nil
-		} else {
+	userFS, err := dm.fileSystemFactory(user, true)
+	if err == nil {
+		bcryptPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+		if err != nil {
 			return nil, err
 		}
+		err = fileSys.WriteFile(userFS, "id", bcryptPass)
+		if err != nil {
+			return nil, err
+		}
+		var items D
+		return &items, nil
 	}
 	return nil, errors.New("user already exists")
 }
 
-func (s *DataManager[D]) CheckPassword(user string, pass string) bool {
-	id := filepath.Join(s.dataFolder, user, "id")
-	b, err := os.ReadFile(id)
+func (dm *DataManager[D]) CheckPassword(user string, pass string) bool {
+	userFS, err := dm.fileSystemFactory(user, false)
 	if err != nil {
 		return false
 	}
-
+	b, err := fileSys.ReadFile(userFS, "id")
+	if err != nil {
+		return false
+	}
 	err = bcrypt.CompareHashAndPassword(b, []byte(pass))
 	if err != nil {
 		return false
@@ -69,10 +69,32 @@ func (s *DataManager[D]) CheckPassword(user string, pass string) bool {
 	return true
 }
 
-func (s *DataManager[D]) CreatePersist(user, pass string) (Persist[D], error) {
-	return s.persistFactory(filepath.Join(s.dataFolder, user), pass)
+type persist[D any] struct {
+	user string
+	dm   *DataManager[D]
+	fs   fileSys.FileSystem
 }
 
-func NewPersistSessionCache[S any](dataFolder string, p PersistFactory[S], sessionLifeTime time.Duration) *Cache[S] {
-	return NewSessionCache[S](NewDataManager(dataFolder, p), sessionLifeTime)
+func (p *persist[D]) Load() (*D, error) {
+	log.Println("load data:", p.user)
+	return p.dm.filePersist.Load(p.fs)
+}
+
+func (p *persist[D]) Save(d *D) error {
+	log.Println("save data:", p.user)
+	return p.dm.filePersist.Save(p.fs, d)
+}
+
+func (dm *DataManager[D]) CreatePersist(user, pass string) (Persist[D], error) {
+	f, err := dm.fileSystemFactory(user, false)
+	if err != nil {
+		return nil, err
+	}
+	if dm.crypt {
+		f, err = fileSys.NewCryptFileSystem(f, pass)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &persist[D]{user: user, dm: dm, fs: f}, nil
 }

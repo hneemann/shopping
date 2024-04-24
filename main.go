@@ -6,32 +6,33 @@ import (
 	"github.com/hneemann/shopping/item"
 	"github.com/hneemann/shopping/server"
 	"github.com/hneemann/shopping/session"
+	"github.com/hneemann/shopping/session/fileSys"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"strconv"
 	"time"
 )
 
-func CreatePersist(userFolder, pass string) (session.Persist[item.Items], error) {
-	return &persist{file: filepath.Join(userFolder, "data.json"), base: filepath.Base(userFolder)}, nil
+type persist struct{}
+
+func (p persist) Load(f fileSys.FileSystem) (*item.Items, error) {
+	r, err := f.Reader("data.json")
+	if err != nil {
+		return nil, err
+	}
+	defer fileSys.CloseLog(r)
+	return item.Load(r)
 }
 
-type persist struct {
-	file string
-	base string
-}
-
-func (p *persist) Load() (*item.Items, error) {
-	log.Println("load data:", p.base)
-	return item.Load(p.file)
-}
-
-func (p *persist) Save(items *item.Items) error {
-	log.Println("write data:", p.base)
-	return items.Save(p.file)
+func (p persist) Save(f fileSys.FileSystem, items *item.Items) error {
+	w, err := f.Writer("data.json")
+	if err != nil {
+		return err
+	}
+	defer fileSys.CloseLog(w)
+	return items.Save(w)
 }
 
 func main() {
@@ -42,7 +43,11 @@ func main() {
 	debug := flag.Bool("debug", false, "starts server in debug mode")
 	flag.Parse()
 
-	sc := session.NewPersistSessionCache[item.Items](*dataFolder, CreatePersist, 30*time.Minute)
+	sc := session.NewSessionCache[item.Items](
+		session.NewDataManager[item.Items](
+			session.NewFileSystemFactory(*dataFolder),
+			persist{}),
+		30*time.Minute)
 	defer sc.Close()
 
 	mux := http.NewServeMux()

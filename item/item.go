@@ -2,9 +2,9 @@ package item
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"math"
-	"os"
 	"sort"
 	"strings"
 	"time"
@@ -131,13 +131,8 @@ func (items Items) Total() Total {
 	return Total{Weight: weight / 1000, Volume: volume / 1000 / 0.87}
 }
 
-func (items Items) Save(file string) error {
-	f, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-
-	err = json.NewEncoder(f).Encode(items)
+func (items Items) Save(w io.Writer) error {
+	err := json.NewEncoder(w).Encode(items)
 	if err != nil {
 		return err
 	}
@@ -451,14 +446,9 @@ func (i *Item) Increment() float64 {
 	return f
 }
 
-func Load(file string) (*Items, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-
+func Load(r io.Reader) (*Items, error) {
 	items := Items{}
-	err = json.NewDecoder(f).Decode(&items)
+	err := json.NewDecoder(r).Decode(&items)
 	if err != nil {
 		return nil, err
 	}

@@ -13,9 +13,9 @@ import (
 
 // Persist is the interface that needs to be implemented to persist the session data
 type Persist[D any] interface {
-	// Load is called to load the data from the persistant storage
+	// Load is called to load the data from the persistent storage
 	Load() (*D, error)
-	// Save is called to save the data to the persistant storage
+	// Save is called to save the data to the persistent storage
 	Save(d *D) error
 }
 
