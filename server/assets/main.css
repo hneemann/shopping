@@ -54,6 +54,7 @@
 
     table.mainTable {
         border: 1px solid black;
+        box-shadow: 10px 10px lightgray;
         border-collapse: collapse;
         margin-left: auto;
         margin-right: auto;

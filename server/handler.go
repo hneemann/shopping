@@ -311,11 +311,9 @@ func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					log.Println(err)
 				}
-				return
 			}
 		}
 	}
-	w.Write([]byte("-"))
 }
 
 var editTemp = Templates.Lookup("edit.html")
