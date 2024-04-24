@@ -193,10 +193,12 @@ type addData struct {
 	Categories []item.Category
 	Shops      []string
 	Error      error
+	Target     string
 }
 
 func AddHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.Items); ok {
+		target := ""
 		var itemName, itemUnit, category, shop string
 		var quantity float64 = 1
 		var volumeStr string
@@ -228,7 +230,13 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 							i.SetQuantity(quantity)
 							data.AddItem(i)
 						}
-						http.Redirect(w, r, "/", http.StatusFound)
+
+						t := r.FormValue("target")
+						if t == "all" {
+							http.Redirect(w, r, "/listAll", http.StatusFound)
+						} else {
+							http.Redirect(w, r, "/", http.StatusFound)
+						}
 						return
 					}
 				}
@@ -238,6 +246,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 			if category == "" {
 				category = string(item.Categories[0])
 			}
+			target = r.URL.Query().Get("t")
 		}
 		err = addTemp.Execute(w, addData{
 			Name:       itemName,
@@ -250,6 +259,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 			Categories: item.Categories,
 			Shops:      data.Shops(),
 			Error:      err,
+			Target:     target,
 		})
 		if err != nil {
 			log.Println(err)

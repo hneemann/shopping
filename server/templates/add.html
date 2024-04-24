@@ -65,6 +65,10 @@
   {{if .QHidden}}
   <input type="hidden" name="quantity" value="{{.Quantity}}"/>
   {{end}}
+  {{if .Target}}
+  <input type="hidden" name="target" value="{{.Target}}"/>
+  {{end}}
+
     <datalist id="shops">
       {{range .Shops }}<option value="{{.}}">{{end}}
     </datalist>
