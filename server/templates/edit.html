@@ -9,10 +9,11 @@
 </head>
 <body>
 
-<p>Artikel bearbeiten</p>
-
 <form action="/edit/" method="post">
-  <table>
+  <table class="mainTable">
+     <tr>
+         <td colspan="3" style="font-size:115%;font-weight:bold;text-align:center">Artikel bearbeiten</td>
+     </tr>
      <tr>
        <td><label for="name">Name:</label></td>
        <td><input class="value" type="text" id="name" name="name" placeholder="Name" value="{{.Item.Name}}"/></td>
@@ -48,31 +49,31 @@
        <td><input class="value" id="volume" name="volume" placeholder="Volumen in ml" value="{{.Item.VolumeStr}}"/></td>
        <td>ml</td>
      </tr>
+     <tr>
+         <td colspan="3" style="text-align:right">
+           <a href="/listAll#q{{.Id}}"><button type="button">Abbrechen</button></a>
+           <input type="submit" value="Ändern"/>
+         </td>
+     </tr>
+     {{if .Error}}<tr><td colspan="3" class="error">{{.Error}}</td></tr>{{end}}
+     <tr>
+       <td colspan="3">
+         <div style="color:red;border:2px solid red;margin:0.2em;padding-left:1em;;padding-right:1em;">
+           <p>Gefahrenzone!</p>
+           <p>
+             <button type="button" onclick="showPopUpById('delete')" title="Artikel komplett entfernen">Löschen</button>
+           </p>
+         </div>
+       </td>
+     </tr>
   </table>
-
-  {{if .Error}}
-    <p class="error">{{.Error}}</p>
-  {{end}}
 
   <datalist id="shops">
     {{range .Shops }}<option value="{{.}}">{{end}}
   </datalist>
 
-  <p>
-  <a href="/listAll#q{{.Id}}"><button type="button">Abbrechen</button></a>
-  <input type="submit" value="Ändern"/>
-  </p>
   <input type="hidden" name="id" value="{{.Id}}"/>
 </form>
-
-<div style="color:red;border:2px solid red;margin:0.5em;padding-left:1em;;padding-right:1em;">
-<p>
-Gefahrenzone!
-</p>
-<p>
-  <button type="button" onclick="showPopUpById('delete')" title="Artikel komplett entfernen">Löschen</button>
-</p>
-</div>
 
 <div id="delete" class="addItem">
 Wirklich '{{.Item.Name}}' unwiederbringlich löschen?<br><br>

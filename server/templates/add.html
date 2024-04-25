@@ -9,10 +9,11 @@
 </head>
 <body>
 
-<p>Neuer Artikel</p>
-
 <form action="/add/" method="post">
-  <table>
+  <table class="mainTable">
+     <tr>
+         <td colspan="3" style="font-size:115%;font-weight:bold;text-align:center">Neuer Artikel</td>
+     </tr>
      <tr>
        <td><label for="name">Name:</label></td>
        <td><input class="value" type="text" id="name" name="name" placeholder="Name" value="{{.Name}}"/></td>
@@ -54,35 +55,29 @@
        <td><input class="value" id="volume" name="volume" placeholder="Volumen in ml" value="{{.Volume}}"/></td>
        <td>ml</td>
      </tr>
+     <tr>
+         <td colspan="3" style="text-align:right">
+             <a {{if eq .Target "all"}}href="/listAll"{{else}}href="/"{{end}}><button type="button">Abbrechen</button></a>
+             <input type="submit" value="Hinzufügen">
+         </td>
+     </tr>
   </table>
-  {{if .Error}}
-    <p class="error">{{.Error}}</p>
-  {{end}}
-  <p>
-  <a href="/"><button type="button">Abbrechen</button></a>
-  <input type="submit" value="Hinzufügen">
-  </p>
-  {{if .QHidden}}
-  <input type="hidden" name="quantity" value="{{.Quantity}}"/>
-  {{end}}
-  {{if .Target}}
-  <input type="hidden" name="target" value="{{.Target}}"/>
-  {{end}}
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+  {{if .QHidden}}<input type="hidden" name="quantity" value="{{.Quantity}}"/>{{end}}
+  {{if .Target}}<input type="hidden" name="target" value="{{.Target}}"/>{{end}}
 
-    <datalist id="shops">
-      {{range .Shops }}<option value="{{.}}">{{end}}
-    </datalist>
+  <datalist id="shops">
+    {{range .Shops }}<option value="{{.}}">{{end}}
+  </datalist>
 
-    <datalist id="units">
-        <option value="Liter">
-        <option value="Flasche">
-        <option value="Packung">
-        <option value="Glas">
-        <option value="Dose">
-        <option value="Tüte">
-    </datalist>
-
+  <datalist id="units">
+    <option value="Liter">
+    <option value="Flasche">
+    <option value="Packung">
+    <option value="Glas">
+    <option value="Dose">
+    <option value="Tüte">
+  </datalist>
 </form>
-
 </body>
 </html>
