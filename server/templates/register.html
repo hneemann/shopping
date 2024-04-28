@@ -28,13 +28,14 @@
       <td></td>
       <td style="text-align:right"><input type="submit" value="Registrieren"></td>
     </tr>
-    {{if .}}
-      <tr><td colspan="2" style="color:red">{{.}}</td></tr>
+    {{if .Error}}
+      <tr><td colspan="2" style="color:red">{{.Error}}</td></tr>
     {{end}}
     <tr>
-      <td colspan="2"><a href="/login">Login</a></td>
+      <td colspan="2"><a href="/login?t={{.Target}}">Login</a></td>
     </tr>
   </table>
+  <input type="hidden" name="target" value="{{.Target}}">
 </form>
 </body>
 </html>

@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"html/template"
 	"log"
@@ -49,7 +50,6 @@ type Cache[D any] struct {
 	sm       Manager[D]
 	shutDown chan struct{}
 	loginUrl string
-	mainUrl  string
 }
 
 // NewSessionCache creates a new session cache
@@ -63,7 +63,6 @@ func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *Cache
 		shutDown: shutDown,
 		lifeTime: sessionLifeTime,
 		loginUrl: "/login",
-		mainUrl:  "/",
 	}
 
 	go func() {
@@ -83,12 +82,6 @@ func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *Cache
 // SetLoginUrl sets the url to redirect to if no session is found
 func (s *Cache[S]) SetLoginUrl(url string) *Cache[S] {
 	s.loginUrl = url
-	return s
-}
-
-// SetMainUrl sets the url to redirect to after login
-func (s *Cache[S]) SetMainUrl(url string) *Cache[S] {
-	s.mainUrl = url
 	return s
 }
 
@@ -256,7 +249,7 @@ func (s *Cache[S]) CheckSessionFunc(parent http.HandlerFunc) http.HandlerFunc {
 func (s *Cache[S]) CheckSession(parent http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if ok := s.CallHandlerWithData(w, r, parent); !ok {
-			http.Redirect(w, r, s.loginUrl, http.StatusFound)
+			http.Redirect(w, r, s.loginUrl+"?t="+EncodeTarget(r.URL.Path), http.StatusFound)
 		}
 	}
 }
@@ -268,6 +261,23 @@ func (s *Cache[S]) CheckSessionRest(parent http.Handler) http.HandlerFunc {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 		}
 	}
+}
+
+type LoginData struct {
+	Target string
+	Error  error
+}
+
+func DecodeTarget(encodedTarget string) string {
+	var target = "/"
+	if targetBytes, err := base64.URLEncoding.DecodeString(encodedTarget); err == nil {
+		target = string(targetBytes)
+	}
+	return target
+}
+
+func EncodeTarget(target string) string {
+	return base64.URLEncoding.EncodeToString([]byte(target))
 }
 
 // LoginHandler is a handler that does the login.
@@ -282,18 +292,26 @@ func (s *Cache[S]) LoginHandler(loginTemp *template.Template) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
+		encodedTarget := r.URL.Query().Get("t")
 		if r.Method == http.MethodPost {
 			user := r.FormValue("username")
 			pass := r.FormValue("password")
+			encodedTarget = r.FormValue("target")
 
 			var id string
 			if id, err = s.CreateSessionId(user, pass); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
-				http.Redirect(w, r, s.mainUrl, http.StatusFound)
+				target := DecodeTarget(encodedTarget)
+				log.Println("redirect to", target)
+				http.Redirect(w, r, target, http.StatusFound)
 				return
 			}
 		}
-		err = loginTemp.Execute(w, err)
+
+		err = loginTemp.Execute(w, LoginData{
+			Target: encodedTarget,
+			Error:  err,
+		})
 		if err != nil {
 			log.Println(err)
 		}
@@ -339,19 +357,26 @@ func (s *Cache[S]) RegisterHandler(registerTemp *template.Template) http.Handler
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
+		encodedTarget := r.URL.Query().Get("t")
 		if r.Method == http.MethodPost {
 			user := r.FormValue("username")
 			pass := r.FormValue("password")
 			pass2 := r.FormValue("password2")
+			encodedTarget = r.FormValue("target")
 
 			var id string
 			if id, err = s.registerUser(user, pass, pass2); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
-				http.Redirect(w, r, s.mainUrl, http.StatusFound)
+				target := DecodeTarget(encodedTarget)
+				log.Println("redirect to", target)
+				http.Redirect(w, r, target, http.StatusFound)
 				return
 			}
 		}
-		err = registerTemp.Execute(w, err)
+		err = registerTemp.Execute(w, LoginData{
+			Target: encodedTarget,
+			Error:  err,
+		})
 		if err != nil {
 			log.Println(err)
 		}
