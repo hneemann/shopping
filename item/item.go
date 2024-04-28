@@ -317,12 +317,12 @@ func (i *Item) Less(other *Item, cat func(Category) int) bool {
 		if i.Name == other.Name {
 			return i.UnitSingular() < other.UnitSingular()
 		}
-		return i.Name < other.Name
+		return strings.ToLower(i.Name) < strings.ToLower(other.Name)
 	}
 	if cat != nil {
 		return cat(i.Category) < cat(other.Category)
 	}
-	return i.Category < other.Category
+	return strings.ToLower(string(i.Category)) < strings.ToLower(string(other.Category))
 }
 
 func (i *Item) ShopMatches(shop string) bool {
