@@ -35,15 +35,6 @@ func (cl CategoryList) First() Category {
 }
 
 const (
-	Cooled Category = "Cooled"
-	Bread  Category = "Bread"
-	Sweets Category = "Sweets"
-	Frozen Category = "Frozen"
-)
-
-type OutlookState int
-
-const (
 	Off = iota
 	Running
 )
@@ -157,8 +148,8 @@ func (items Items) DeleteFromList(id int) {
 	}
 }
 
-func (items Items) Payed() {
-	log.Println("Payed")
+func (items Items) Paid() {
+	log.Println("Paid")
 	ti := time.Now()
 	for _, item := range items {
 		if item.QuantityRequired > 0 && item.IsInCar {
@@ -168,6 +159,7 @@ func (items Items) Payed() {
 			})
 			item.QuantityRequired = 0
 			item.IsInCar = false
+			item.suggestedQuantityCalculated = false
 		}
 	}
 }
@@ -267,23 +259,24 @@ func (items *Items) createUniqueNames() {
 }
 
 type Item struct {
-	Id               int
-	Name             string
-	uniqueName       string
-	Shops            []string
-	QuantityRequired float64
-	IsInCar          bool   `json:"Basket"`
-	UnitDef          string `json:"Unit"`
-	unitCreated      bool
-	unitSingular     string
-	unitPlural       string
-	Weight           int
-	WeightStr        string
-	Volume           int
-	VolumeStr        string
-	Category         Category
-	ShopHistory      []HistoryEntry
-	OutlookState     OutlookState
+	Id                          int
+	Name                        string
+	uniqueName                  string
+	Shops                       []string
+	QuantityRequired            float64
+	IsInCar                     bool   `json:"Basket"`
+	UnitDef                     string `json:"Unit"`
+	unitCreated                 bool
+	unitSingular                string
+	unitPlural                  string
+	Weight                      int
+	WeightStr                   string
+	Volume                      int
+	VolumeStr                   string
+	Category                    Category
+	ShopHistory                 []HistoryEntry
+	suggestedQuantityCalculated bool
+	suggestedQuantityRequired   float64
 }
 
 func New(name string, unit string, weight int, weightStr string, volume int, volumeStr string, category Category, shops []string) *Item {
@@ -358,24 +351,30 @@ func (i *Item) ShopsStr() string {
 }
 
 func (i *Item) Suggest() float64 {
-	if i.OutlookState == Off || len(i.ShopHistory) < 2 {
-		return 0
-	}
-	count := 0.0
-	pending := 0.0
-	for _, entry := range i.ShopHistory {
-		count += pending
-		pending = entry.Quantity
-	}
-	first := i.ShopHistory[0].ShopTime
-	last := i.ShopHistory[len(i.ShopHistory)-1].ShopTime
+	if !i.suggestedQuantityCalculated {
+		i.suggestedQuantityCalculated = true
+		if len(i.ShopHistory) > 2 {
+			count := 0.0
+			lastCount := 0.0
+			for _, entry := range i.ShopHistory {
+				count += lastCount
+				lastCount = entry.Quantity
+			}
+			first := i.ShopHistory[0].ShopTime
+			last := i.ShopHistory[len(i.ShopHistory)-1].ShopTime
 
-	timePerItem := last.Sub(first) / time.Duration(count)
-	suggestion := math.Round(float64(time.Since(last)/timePerItem) - pending)
-	if suggestion < 1 {
-		suggestion = 0
+			timePerItem := last.Sub(first) / time.Duration(count)
+			timeToPlan := time.Since(last) + time.Hour*24*4
+			suggestion := math.Round(timeToPlan.Hours()/timePerItem.Hours() - lastCount)
+			if suggestion < 0 {
+				suggestion = 0
+			}
+			i.suggestedQuantityRequired = suggestion
+		} else {
+			i.suggestedQuantityRequired = 0
+		}
 	}
-	return suggestion
+	return i.suggestedQuantityRequired
 }
 
 func (i *Item) UnitSingular() string {

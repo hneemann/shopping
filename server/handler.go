@@ -86,8 +86,8 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			action := query.Get("a")
 			switch action {
-			case "payed":
-				data.Payed()
+			case "paid":
+				data.Paid()
 			}
 		}
 
