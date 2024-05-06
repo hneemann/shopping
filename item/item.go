@@ -39,11 +39,6 @@ func (cl CategoryList) First() Category {
 	return (cl)[0]
 }
 
-const (
-	Off = iota
-	Running
-)
-
 type HistoryEntry struct {
 	ShopTime time.Time
 	Quantity float64
