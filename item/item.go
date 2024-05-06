@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const (
+	historyDays           = 90
+	daysShoppingHasToLast = 4
+)
+
 type Category string
 
 type CategoryList []Category
@@ -258,6 +263,22 @@ func (items *Items) createUniqueNames() {
 	}
 }
 
+func (items *Items) removeOldHistory() {
+	t := time.Now().Add(-time.Hour * 24 * historyDays)
+	for _, item := range *items {
+		if len(item.ShopHistory) > 0 {
+			for i := 0; i < len(item.ShopHistory); i++ {
+				if item.ShopHistory[i].ShopTime.Before(t) {
+					log.Println("remove old history", item.Name, item.ShopHistory[i].ShopTime)
+					item.ShopHistory = item.ShopHistory[i:]
+				} else {
+					break
+				}
+			}
+		}
+	}
+}
+
 type Item struct {
 	Id                          int
 	Name                        string
@@ -364,7 +385,7 @@ func (i *Item) Suggest() float64 {
 			last := i.ShopHistory[len(i.ShopHistory)-1].ShopTime
 
 			timePerItem := last.Sub(first) / time.Duration(count)
-			timeToPlan := time.Since(last) + time.Hour*24*4
+			timeToPlan := time.Since(last) + time.Hour*24*daysShoppingHasToLast
 			suggestion := math.Round(timeToPlan.Hours()/timePerItem.Hours() - lastCount)
 			if suggestion < 0 {
 				suggestion = 0
@@ -452,6 +473,7 @@ func Load(r io.Reader) (*Items, error) {
 		return nil, err
 	}
 
+	items.removeOldHistory()
 	items.createUniqueNames()
 
 	return &items, nil
