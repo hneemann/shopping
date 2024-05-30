@@ -25,7 +25,7 @@
           <tr>
             <td onclick="showSetQuantity({{.QuantityRequired}},{{.Id}});" {{if .IsInCar}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
             <td class="number" onclick="showSetQuantity({{.QuantityRequired}},{{.Id}});">{{niceToStr .QuantityRequired}}</td>
-            <td>{{.Unit}}</td>
+            <td>{{.ShortUnit}}</td>
             <td class="car"><img id="car_{{.Id}}" class="list" {{if .IsInCar}}src="/assets/eCar.svg"{{else}}src="/assets/sCar.svg"{{end}} onclick="updateItem({{.Id}},'car');"></td>
           </tr>
           {{- $lastCat = .Category -}}

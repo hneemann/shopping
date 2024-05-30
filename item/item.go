@@ -1,6 +1,7 @@
 package item
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"log"
@@ -8,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 const (
@@ -285,6 +288,8 @@ type Item struct {
 	unitCreated                 bool
 	unitSingular                string
 	unitPlural                  string
+	unitSingularShort           string
+	unitPluralShort             string
 	Weight                      int
 	WeightStr                   string
 	Volume                      int
@@ -411,6 +416,14 @@ func (i *Item) Unit() string {
 	return i.unitPlural
 }
 
+func (i *Item) ShortUnit() string {
+	i.createUnits()
+	if i.QuantityRequired == 1 {
+		return i.unitSingularShort
+	}
+	return i.unitPluralShort
+}
+
 var unitPluralMap = map[string]string{
 	"Dose":    "Dosen",
 	"Packung": "Packungen",
@@ -422,6 +435,7 @@ var unitPluralMap = map[string]string{
 	"Rolle":   "Rollen",
 	"Tube":    "Tuben",
 	"Sack":    "Säcke",
+	"Box":     "Boxen",
 }
 
 func (i *Item) createUnits() {
@@ -434,6 +448,8 @@ func (i *Item) createUnits() {
 	if len(u) == 0 {
 		i.unitSingular = ""
 		i.unitPlural = ""
+		i.unitSingularShort = ""
+		i.unitPluralShort = ""
 		return
 	}
 	p := strings.Index(u, ",")
@@ -448,6 +464,37 @@ func (i *Item) createUnits() {
 			i.unitPlural = i.unitSingular
 		}
 	}
+	i.unitSingularShort = shorten(i.unitSingular)
+	i.unitPluralShort = shorten(i.unitPlural)
+}
+
+func shorten(s string) string {
+	ts := strings.TrimSpace(s)
+	if utf8.RuneCountInString(ts) <= 4 {
+		return ts
+	}
+
+	lastSpace := true
+	var b bytes.Buffer
+	for _, r := range s {
+		if unicode.IsSpace(r) {
+			lastSpace = true
+		} else {
+			if lastSpace {
+				if b.Len() > 0 {
+					b.WriteRune(unicode.ToUpper(r))
+				} else {
+					b.WriteRune(r)
+				}
+			} else {
+				if !(r == 'a' || r == 'e' || r == 'i' || r == 'o' || r == 'u' || r == 'ä' || r == 'ö' || r == 'ü') {
+					b.WriteRune(r)
+				}
+			}
+			lastSpace = false
+		}
+	}
+	return b.String()
 }
 
 func (i *Item) Increment() float64 {
