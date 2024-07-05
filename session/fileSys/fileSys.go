@@ -8,8 +8,12 @@ import (
 	"path/filepath"
 )
 
+// FileSystem is an interface for reading and writing files.
+// Is created to access the user data
 type FileSystem interface {
+	//Reader returns a reader for the file with the given name
 	Reader(name string) (io.ReadCloser, error)
+	//Writer returns a writer for the file with the given name
 	Writer(name string) (io.WriteCloser, error)
 }
 
