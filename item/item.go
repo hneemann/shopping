@@ -265,14 +265,16 @@ func (items *Items) removeOldHistory() {
 	t := time.Now().Add(-time.Hour * 24 * historyDays)
 	for _, item := range *items {
 		if len(item.ShopHistory) > 0 {
+			h := make([]HistoryEntry, 0, len(item.ShopHistory))
 			for i := 0; i < len(item.ShopHistory); i++ {
-				if item.ShopHistory[i].ShopTime.Before(t) {
-					log.Println("remove old history", item.Name, item.ShopHistory[i].ShopTime)
-					item.ShopHistory = item.ShopHistory[i:]
-				} else {
-					break
+				if item.ShopHistory[i].ShopTime.After(t) {
+					h = append(h, item.ShopHistory[i])
 				}
 			}
+			if len(h) < len(item.ShopHistory) {
+				log.Println("removed history for", item.Name, len(item.ShopHistory)-len(h))
+			}
+			item.ShopHistory = h
 		}
 	}
 }
