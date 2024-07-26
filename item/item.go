@@ -262,19 +262,19 @@ func (items *Items) createUniqueNames() {
 }
 
 func (items *Items) removeOldHistory() {
-	t := time.Now().Add(-time.Hour * 24 * historyDays)
+	cutTime := time.Now().Add(-time.Hour * 24 * historyDays)
 	for _, item := range *items {
-		if len(item.ShopHistory) > 0 {
-			h := make([]HistoryEntry, 0, len(item.ShopHistory))
-			for i := 0; i < len(item.ShopHistory); i++ {
-				if item.ShopHistory[i].ShopTime.After(t) {
-					h = append(h, item.ShopHistory[i])
-				}
+		removed := 0
+		for len(item.ShopHistory) > 0 {
+			if item.ShopHistory[0].ShopTime.Before(cutTime) {
+				item.ShopHistory = item.ShopHistory[1:]
+				removed++
+			} else {
+				break
 			}
-			if len(h) < len(item.ShopHistory) {
-				log.Println("removed history for", item.Name, len(item.ShopHistory)-len(h))
-			}
-			item.ShopHistory = h
+		}
+		if removed > 0 {
+			log.Println("removed", removed, "old entries from", item.Name)
 		}
 	}
 }
