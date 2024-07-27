@@ -42,33 +42,53 @@ type sessionCacheEntry[D any] struct {
 	data       *D
 }
 
+func (sce *sessionCacheEntry[S]) saveData() {
+	sce.mutex.Lock()
+	defer sce.mutex.Unlock()
+
+	if sce.data != nil {
+		err := sce.persist.Save(sce.data)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
 // Cache is the session cache
 type Cache[D any] struct {
-	mutex    sync.Mutex
-	lifeTime time.Duration
-	sessions map[string]*sessionCacheEntry[D]
-	sm       Manager[D]
-	shutDown chan struct{}
-	loginUrl string
+	mutex         sync.Mutex
+	dataLifeTime  time.Duration
+	tokenLifeTime time.Duration
+	sessions      map[string]*sessionCacheEntry[D]
+	sm            Manager[D]
+	shutDown      chan struct{}
+	loginUrl      string
 }
 
 // NewSessionCache creates a new session cache
 // sm is the session manager
 // sessionLifeTime is the time a session is valid
-func NewSessionCache[S any](sm Manager[S], sessionLifeTime time.Duration) *Cache[S] {
+func NewSessionCache[S any](sm Manager[S], tokenLifeTime, dataLifeTime time.Duration) *Cache[S] {
 	shutDown := make(chan struct{})
 	sc := Cache[S]{
-		sessions: make(map[string]*sessionCacheEntry[S]),
-		sm:       sm,
-		shutDown: shutDown,
-		lifeTime: sessionLifeTime,
-		loginUrl: "/login",
+		sessions:      make(map[string]*sessionCacheEntry[S]),
+		sm:            sm,
+		shutDown:      shutDown,
+		dataLifeTime:  dataLifeTime,
+		tokenLifeTime: tokenLifeTime,
+		loginUrl:      "/login",
+	}
+
+	checkIntervall := dataLifeTime
+	if tokenLifeTime < dataLifeTime {
+		log.Println("token lifeTime is shorter than data lifeTime!")
+		checkIntervall = tokenLifeTime
 	}
 
 	go func() {
 		for {
 			select {
-			case <-time.After(sessionLifeTime):
+			case <-time.After(checkIntervall):
 				sc.checkSessions()
 			case <-shutDown:
 				return
@@ -85,25 +105,35 @@ func (s *Cache[S]) SetLoginUrl(url string) *Cache[S] {
 	return s
 }
 
-func (s *Cache[S]) getSession(id string) *sessionCacheEntry[S] {
+func (s *Cache[S]) getSession(token string) *sessionCacheEntry[S] {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if sce, ok := s.sessions[id]; ok {
-		if time.Since(sce.lastAccess) < s.lifeTime {
+	if sce, ok := s.sessions[token]; ok {
+		if time.Since(sce.lastAccess) < s.tokenLifeTime {
+
+			sce.mutex.Lock()
+			defer sce.mutex.Unlock()
+
+			if sce.data == nil {
+				data, err := sce.persist.Load()
+				if err != nil {
+					log.Println("could not reload session data", err)
+					return nil
+				}
+				sce.data = data
+			}
+
 			return sce
 		} else {
-			err := sce.persist.Save(sce.data)
-			if err != nil {
-				log.Println(err)
-			}
-			delete(s.sessions, id)
+			sce.saveData()
+			delete(s.sessions, token)
 		}
 	}
 	return nil
 }
 
-func (s *Cache[S]) CreateSessionId(user string, pass string) (string, error) {
+func (s *Cache[S]) CreateSessionToken(user string, pass string) (string, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -115,11 +145,11 @@ func (s *Cache[S]) CreateSessionId(user string, pass string) (string, error) {
 		return "", errors.New("wrong password")
 	}
 
-	for id, sce := range s.sessions {
+	for token, sce := range s.sessions {
 		if sce.user == user {
 			sce.lastAccess = time.Now()
 			log.Println("gained access to an existing session")
-			return id, nil
+			return token, nil
 		}
 	}
 
@@ -132,12 +162,12 @@ func (s *Cache[S]) CreateSessionId(user string, pass string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	id := createRandomString()
+	token := createRandomString()
 
 	ses := &sessionCacheEntry[S]{lastAccess: time.Now(), data: data, user: user, persist: p}
-	s.sessions[id] = ses
+	s.sessions[token] = ses
 
-	return id, nil
+	return token, nil
 }
 
 func (s *Cache[S]) registerUser(user, pass, pass2 string) (string, error) {
@@ -161,12 +191,12 @@ func (s *Cache[S]) registerUser(user, pass, pass2 string) (string, error) {
 		return "", err
 	}
 
-	id := createRandomString()
+	token := createRandomString()
 
 	ses := &sessionCacheEntry[S]{lastAccess: time.Now(), data: data, user: user, persist: p}
-	s.sessions[id] = ses
+	s.sessions[token] = ses
 
-	return id, nil
+	return token, nil
 }
 
 func (s *Cache[S]) checkSessions() {
@@ -177,13 +207,14 @@ func (s *Cache[S]) checkSessions() {
 		return
 	}
 
-	for id, sce := range s.sessions {
-		if time.Since(sce.lastAccess) > s.lifeTime {
-			err := sce.persist.Save(sce.data)
-			if err != nil {
-				log.Println(err)
-			}
-			delete(s.sessions, id)
+	for token, sce := range s.sessions {
+		age := time.Since(sce.lastAccess)
+		if age > s.tokenLifeTime {
+			sce.saveData()
+			delete(s.sessions, token)
+		} else if age > s.dataLifeTime {
+			sce.saveData()
+			sce.data = nil
 		}
 	}
 }
@@ -200,10 +231,7 @@ func (s *Cache[S]) Close() {
 	close(s.shutDown)
 
 	for _, sce := range s.sessions {
-		err := sce.persist.Save(sce.data)
-		if err != nil {
-			log.Println(err)
-		}
+		sce.saveData()
 	}
 	s.sm = nil
 }
@@ -299,7 +327,7 @@ func (s *Cache[S]) LoginHandler(loginTemp *template.Template) http.HandlerFunc {
 			encodedTarget = r.FormValue("target")
 
 			var id string
-			if id, err = s.CreateSessionId(user, pass); err == nil {
+			if id, err = s.CreateSessionToken(user, pass); err == nil {
 				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
 				target := DecodeTarget(encodedTarget)
 				log.Println("redirect to", target)
@@ -332,10 +360,7 @@ func (s *Cache[S]) LogoutHandler(logoutTemp *template.Template) http.HandlerFunc
 			if se := s.getSession(id); se != nil {
 				se.mutex.Lock()
 				defer se.mutex.Unlock()
-				err := se.persist.Save(se.data)
-				if err != nil {
-					log.Println(err)
-				}
+				se.saveData()
 				delete(s.sessions, id)
 			}
 			http.SetCookie(w, &http.Cookie{Value: "", Name: "id", Expires: time.Now().Add(-time.Hour)})
