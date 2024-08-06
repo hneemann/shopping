@@ -57,7 +57,13 @@ function shopChanged() {
 }
 
 function addItemShow() {
-    addItemItemChanged();
+    var catSelected = document.getElementById('category').value;
+    var catOfItemSelected= getAddItemCat();
+    if (catSelected === catOfItemSelected) {
+        addItemItemChanged();
+    } else {
+        addItemCatChanged();
+    }
     showPopUpById('addItem')
 }
 
@@ -100,6 +106,16 @@ function getUnitById(id) {
         incr = parseFloat(item.getAttribute("data-inc"))
     }
     return {unit: unit, increment: incr};
+}
+
+function getAddItemCat() {
+    let itemSelect = document.getElementById('addItemItem');
+    let id = itemSelect.value;
+    let item = document.getElementById(id);
+    if (item === null) {
+        return "";
+    }
+    return item.getAttribute("data-cat");
 }
 
 function addItemItemChanged() {
