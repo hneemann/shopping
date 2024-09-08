@@ -377,11 +377,15 @@ func (i *Item) Suggest() float64 {
 	if !i.suggestedQuantityCalculated {
 		i.suggestedQuantityCalculated = true
 		if len(i.ShopHistory) > 2 {
+			maxEverAdded := 0.0
 			count := 0.0
 			lastCount := 0.0
 			for _, entry := range i.ShopHistory {
 				count += lastCount
 				lastCount = entry.Quantity
+				if lastCount > maxEverAdded {
+					maxEverAdded = lastCount
+				}
 			}
 			first := i.ShopHistory[0].ShopTime
 			last := i.ShopHistory[len(i.ShopHistory)-1].ShopTime
@@ -391,6 +395,8 @@ func (i *Item) Suggest() float64 {
 			suggestion := math.Round(timeToPlan.Hours()/timePerItem.Hours() - lastCount)
 			if suggestion < 0 {
 				suggestion = 0
+			} else if suggestion > maxEverAdded+1 {
+				suggestion = maxEverAdded + 1
 			}
 			i.suggestedQuantityRequired = suggestion
 		} else {
