@@ -358,8 +358,6 @@ func (s *Cache[S]) LogoutHandler(logoutTemp *template.Template) http.HandlerFunc
 		if c, err := r.Cookie("id"); err == nil {
 			id := c.Value
 			if se := s.getSession(id); se != nil {
-				se.mutex.Lock()
-				defer se.mutex.Unlock()
 				se.saveData()
 				delete(s.sessions, id)
 			}
