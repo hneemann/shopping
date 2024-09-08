@@ -1,7 +1,7 @@
     <td>{{.Name}}</td>
     <td><img class="list" onclick="modify({{.Id}},-1)" src="/assets/sub.svg"></td>
-    <td class="number" style="text-align: center;">{{if .QuantityRequired}}{{niceToStr .QuantityRequired}}{{else}}-{{end}}
-                                                   {{if .Suggest}} <span title="Empfehlung">({{niceToStr .Suggest}}){{end}}</span></td>
+    <td class="number" style="text-align: center;white-space: nowrap;">{{if .QuantityRequired}}{{niceToStr .QuantityRequired}}{{else}}-{{end}}
+                                                   {{- if and .Suggest (not (eq .Suggest .QuantityRequired))}}<span title="Empfehlung" style="color:gray">/{{niceToStr .Suggest}}</span>{{end}}</td>
     <td><img class="list" onclick="modify({{.Id}},1)" src="/assets/add.svg"></td>
     <td>{{.Unit}}</td>
     <td class="number pcOnly" title="Gewicht in g">{{.Weight}}</td>
