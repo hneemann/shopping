@@ -11,12 +11,12 @@
 
 <table class="mainTable">
     <tr>
-      <td colspan="8" style="font-size:115%;font-weight:bold;">Shopping, {{len .}} Artikel
+      <td colspan="8" style="font-size:115%;font-weight:bold;">Shopping, {{len .Items}} Artikel
           <a href="/add?t=all"><img class="list" style="top:0.2em" src="/assets/add.svg" title="Artikel hinzufügen"></a></td>
       <td><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a></td>
     </tr>
     {{$lastCat := ""}}
-    {{range . }}
+    {{range .Items }}
       {{if not (eq .Category $lastCat) }}
       <tr><th colspan="5">{{.Category}}</th></tr>
       {{end}}

@@ -17,7 +17,7 @@ import (
 
 type persist struct{}
 
-func (p persist) Load(f fileSys.FileSystem) (*item.Items, error) {
+func (p persist) Load(f fileSys.FileSystem) (*item.ListData, error) {
 	r, err := f.Reader("data.json")
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (p persist) Load(f fileSys.FileSystem) (*item.Items, error) {
 	return item.Load(r)
 }
 
-func (p persist) Save(f fileSys.FileSystem, items *item.Items) error {
+func (p persist) Save(f fileSys.FileSystem, items *item.ListData) error {
 	w, err := f.Writer("data.json")
 	if err != nil {
 		return err
@@ -43,8 +43,8 @@ func main() {
 	debug := flag.Bool("debug", false, "starts server in debug mode")
 	flag.Parse()
 
-	sc := session.NewSessionCache[item.Items](
-		session.NewDataManager[item.Items](
+	sc := session.NewSessionCache[item.ListData](
+		session.NewDataManager[item.ListData](
 			session.NewFileSystemFactory(*dataFolder),
 			persist{}),
 		24*time.Hour, 30*time.Minute)
@@ -61,6 +61,7 @@ func main() {
 	mux.HandleFunc("/listAll", sc.CheckSessionFunc(server.ListAllHandler))
 	mux.HandleFunc("/listAllMod/", sc.CheckSessionRest(http.HandlerFunc(server.ListAllModHandler)))
 	mux.HandleFunc("/edit/", sc.CheckSessionFunc(server.EditHandler))
+	mux.HandleFunc("/notes/", sc.CheckSessionRest(http.HandlerFunc(server.NotesHandler)))
 
 	assetServer := http.FileServer(http.FS(server.AssetFS))
 	if *debug {

@@ -8,7 +8,7 @@
   <script type="text/javascript" src="/assets/popup.js"></script>
   <script type="text/javascript" src="/assets/main.js"></script>
 </head>
-<body>
+<body onload="notesInit();">
 
 <table id="table" class="mainTable">
 {{template "table.html" .}}
@@ -37,7 +37,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
       <td colspan="4">
       <select class="value" name="item" id="addItemItem" onchange="addItemItemChanged()">
         {{$cs := .CategorySelected}}
-        {{range .Items }}{{if eq .Category $cs }}<option value="{{.Id}}">{{.Name}}</option>{{end}}{{end}}
+        {{range .ListData.Items }}{{if eq .Category $cs }}<option value="{{.Id}}">{{.Name}}</option>{{end}}{{end}}
       </select>
       </td>
     </tr>
@@ -85,7 +85,7 @@ Wirklich alle Artikel im Einkaufswagen gekauft?<br><br>
 </div>
 
 <datalist id="items">
-  {{range .Items }}<option id="{{.Id}}" data-cat="{{.Category}}" data-u="{{.Unit}}" data-inc="{{.Increment}}" value="{{.UniqueName}}">{{.UniqueName}}</option>
+  {{range .ListData.Items }}<option id="{{.Id}}" data-cat="{{.Category}}" data-u="{{.Unit}}" data-inc="{{.Increment}}" value="{{.UniqueName}}">{{.UniqueName}}</option>
   {{end}}
 </datalist>
 

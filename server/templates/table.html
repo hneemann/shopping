@@ -16,7 +16,7 @@
     {{$lastCat := ""}}
     {{$shop := .Shop}}
     {{$hide := .HideCart}}
-    {{range .Items }}
+    {{range .ListData.Items }}
       {{- if and (.ShopMatches $shop) (gt .QuantityRequired 0.0) -}}
         {{- if not (and $hide .IsInCar) -}}
           {{- if not (eq .Category $lastCat) -}}
@@ -34,11 +34,17 @@
     {{end}}
 
     <tr>
-    {{$total := .Items.Total}}
+    {{$total := .ListData.Total}}
     <td style="padding-top: 1em; padding-bottom: 1em;" colspan="4">Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</td>
     </tr>
 
-    {{if .Items.SomethingHidden}}
+    <tr>
+        <td colspan="4" >
+            <textarea id="notes" rows="{{.ListData.NotesLines}}" placeholder="Notizen" autocomplete="off" onchange="notesChanged();">{{.ListData.Notes}}</textarea>
+        </td>
+    </tr>
+
+    {{if .ListData.SomethingHidden}}
     <tr>
     <td>
       {{if .HideCart}}<img class="list" onclick="updateTable('h=0')" src="/assets/eye.svg" title="Zeige Alles">

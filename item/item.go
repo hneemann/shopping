@@ -47,43 +47,54 @@ type HistoryEntry struct {
 	Quantity float64
 }
 
-type Items []*Item
+type ListData struct {
+	Items []*Item
+	Notes string
+}
 
 type Total struct {
 	Weight float64
 	Volume float64
 }
 
-func (items *Items) AddItem(item *Item) {
+func (ld *ListData) NotesLines() int {
+	if len(ld.Notes) > 0 {
+		lines := strings.Split(ld.Notes, "\n")
+		return len(lines)
+	}
+	return 1
+}
+
+func (ld *ListData) AddItem(item *Item) {
 	id := 0
-	for _, it := range *items {
+	for _, it := range ld.Items {
 		if it.Id > id {
 			id = it.Id
 		}
 	}
 	item.Id = id + 1
-	*items = append(*items, item)
-	items.createUniqueNames()
-	items.Order(rewe)
+	ld.Items = append(ld.Items, item)
+	ld.createUniqueNames()
+	ld.Order(rewe)
 }
 
-func (items *Items) DeleteItem(id int) {
+func (ld *ListData) DeleteItem(id int) {
 	index := -1
-	for i, item := range *items {
+	for i, item := range ld.Items {
 		if item.Id == id {
 			index = i
 		}
 	}
 	if index >= 0 {
-		log.Println("finally delete item", (*items)[index].Name)
-		*items = append((*items)[:index], (*items)[index+1:]...)
-		items.createUniqueNames()
-		items.Order(rewe)
+		log.Println("finally delete item", ld.Items[index].Name)
+		ld.Items = append(ld.Items[:index], ld.Items[index+1:]...)
+		ld.createUniqueNames()
+		ld.Order(rewe)
 	}
 }
 
-func (items Items) IdValid(id int) bool {
-	for _, item := range items {
+func (ld *ListData) IdValid(id int) bool {
+	for _, item := range ld.Items {
 		if item.Id == id {
 			return true
 		}
@@ -91,8 +102,8 @@ func (items Items) IdValid(id int) bool {
 	return false
 }
 
-func (items *Items) ItemById(id int) *Item {
-	for _, item := range *items {
+func (ld *ListData) ItemById(id int) *Item {
+	for _, item := range ld.Items {
 		if item.Id == id {
 			return item
 		}
@@ -100,22 +111,22 @@ func (items *Items) ItemById(id int) *Item {
 	return nil
 }
 
-func (items Items) Replace(id int, edit *Item) {
-	for i, item := range items {
+func (ld *ListData) Replace(id int, edit *Item) {
+	for i, item := range ld.Items {
 		if item.Id == id {
 			edit.Id = item.Id
 			edit.QuantityRequired = item.QuantityRequired
-			items[i] = edit
+			ld.Items[i] = edit
 		}
 	}
-	items.createUniqueNames()
-	items.Order(rewe)
+	ld.createUniqueNames()
+	ld.Order(rewe)
 }
 
-func (items Items) Total() Total {
+func (ld *ListData) Total() Total {
 	weight := 0.0
 	volume := 0.0
-	for _, item := range items {
+	for _, item := range ld.Items {
 		q := item.QuantityRequired
 		if q > 0 {
 			weight += float64(item.Weight) * q
@@ -125,8 +136,8 @@ func (items Items) Total() Total {
 	return Total{Weight: weight / 1000, Volume: volume / 1000 / 0.87}
 }
 
-func (items Items) Save(w io.Writer) error {
-	err := json.NewEncoder(w).Encode(items)
+func (ld *ListData) Save(w io.Writer) error {
+	err := json.NewEncoder(w).Encode(ld)
 	if err != nil {
 		return err
 	}
@@ -134,8 +145,8 @@ func (items Items) Save(w io.Writer) error {
 	return nil
 }
 
-func (items Items) ToggleInCar(id int) {
-	if item := items.ItemById(id); item != nil {
+func (ld *ListData) ToggleInCar(id int) {
+	if item := ld.ItemById(id); item != nil {
 		if item.QuantityRequired > 0 {
 			item.IsInCar = !item.IsInCar
 			log.Println("in car:", item.Name, item.IsInCar)
@@ -143,32 +154,40 @@ func (items Items) ToggleInCar(id int) {
 	}
 }
 
-func (items Items) DeleteFromList(id int) {
-	if item := items.ItemById(id); item != nil {
+func (ld *ListData) DeleteFromList(id int) {
+	if item := ld.ItemById(id); item != nil {
 		log.Println("deleted", item.Name)
 		item.QuantityRequired = 0
 		item.IsInCar = false
 	}
 }
 
-func (items Items) Paid() {
+func (ld *ListData) Paid() {
 	log.Println("Paid")
 	ti := time.Now()
-	for _, item := range items {
-		if item.QuantityRequired > 0 && item.IsInCar {
-			item.ShopHistory = append(item.ShopHistory, HistoryEntry{
-				ShopTime: ti,
-				Quantity: item.QuantityRequired,
-			})
-			item.QuantityRequired = 0
-			item.IsInCar = false
-			item.suggestedQuantityCalculated = false
+	isItemInCar := false
+	for _, item := range ld.Items {
+		if item.QuantityRequired > 0 {
+			if item.IsInCar {
+				item.ShopHistory = append(item.ShopHistory, HistoryEntry{
+					ShopTime: ti,
+					Quantity: item.QuantityRequired,
+				})
+				item.QuantityRequired = 0
+				item.IsInCar = false
+				item.suggestedQuantityCalculated = false
+			} else {
+				isItemInCar = true
+			}
 		}
+	}
+	if !isItemInCar {
+		ld.Notes = ""
 	}
 }
 
-func (items Items) SetQuantity(id int, q float64) {
-	if item := items.ItemById(id); item != nil {
+func (ld *ListData) SetQuantity(id int, q float64) {
+	if item := ld.ItemById(id); item != nil {
 		if q < 0 {
 			q = 0
 		}
@@ -176,8 +195,8 @@ func (items Items) SetQuantity(id int, q float64) {
 	}
 }
 
-func (items Items) ModQuantity(id int, n float64, useUnitIncrement bool) {
-	if item := items.ItemById(id); item != nil {
+func (ld *ListData) ModQuantity(id int, n float64, useUnitIncrement bool) {
+	if item := ld.ItemById(id); item != nil {
 		log.Println("mod quantity", item.Name, n)
 		f := 1.0
 		if useUnitIncrement {
@@ -192,8 +211,8 @@ func (items Items) ModQuantity(id int, n float64, useUnitIncrement bool) {
 	}
 }
 
-func (items Items) SomethingHidden() bool {
-	for _, item := range items {
+func (ld *ListData) SomethingHidden() bool {
+	for _, item := range ld.Items {
 		if item.QuantityRequired > 0 && item.IsInCar {
 			return true
 		}
@@ -214,15 +233,15 @@ func MapOrder(str ...Category) func(Category) int {
 	}
 }
 
-func (items Items) Order(c func(Category) int) {
-	sort.Slice(items, func(i, j int) bool {
-		return items[i].Less(items[j], c)
+func (ld *ListData) Order(c func(Category) int) {
+	sort.Slice(ld.Items, func(i, j int) bool {
+		return ld.Items[i].Less(ld.Items[j], c)
 	})
 }
 
-func (items *Items) Shops() []string {
+func (ld *ListData) Shops() []string {
 	shops := make(map[string]struct{})
-	for _, item := range *items {
+	for _, item := range ld.Items {
 		if item.QuantityRequired > 0 {
 			if len(item.Shops) == 0 {
 				shops[""] = struct{}{}
@@ -241,9 +260,9 @@ func (items *Items) Shops() []string {
 	return result
 }
 
-func (items *Items) createUniqueNames() {
+func (ld *ListData) createUniqueNames() {
 	names := make(map[string]*[]*Item)
-	for _, item := range *items {
+	for _, item := range ld.Items {
 		item.uniqueName = ""
 		list := names[item.Name]
 		if list == nil {
@@ -261,9 +280,9 @@ func (items *Items) createUniqueNames() {
 	}
 }
 
-func (items *Items) removeOldHistory() {
+func (ld *ListData) removeOldHistory() {
 	cutTime := time.Now().Add(-time.Hour * 24 * historyDays)
-	for _, item := range *items {
+	for _, item := range ld.Items {
 		removed := 0
 		for len(item.ShopHistory) > 0 {
 			if item.ShopHistory[0].ShopTime.Before(cutTime) {
@@ -516,8 +535,8 @@ func (i *Item) Increment() float64 {
 	return f
 }
 
-func Load(r io.Reader) (*Items, error) {
-	items := Items{}
+func Load(r io.Reader) (*ListData, error) {
+	items := ListData{}
 	err := json.NewDecoder(r).Decode(&items)
 	if err != nil {
 		return nil, err

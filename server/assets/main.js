@@ -171,3 +171,25 @@ function updateTable(query) {
             table.innerHTML = html;
         })
 }
+
+function notesChanged() {
+    let notes = document.getElementById('notes').value;
+    fetch("/notes/?n=" + encodeURIComponent(notes))
+        .then(function (response) {
+            if (response.status !== 200) {
+                window.location.reload();
+            }
+        })
+}
+
+function notesInit() {
+    let element = document.getElementById('notes');
+    element.addEventListener('input', notesCheckLines);
+}
+
+function notesCheckLines() {
+    let element = document.getElementById('notes');
+    let notes = element.value;
+    let lines = notes.split('\n').length;
+    element.rows = lines;
+}

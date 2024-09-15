@@ -39,7 +39,7 @@ var tableTemp = Templates.Lookup("table.html")
 var addTemp = Templates.Lookup("add.html")
 
 type mainData struct {
-	Items            *item.Items
+	ListData         *item.ListData
 	HideCart         bool
 	Categories       item.CategoryList
 	CategorySelected item.Category
@@ -48,10 +48,10 @@ type mainData struct {
 }
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.Items); ok {
+	if data, ok := r.Context().Value("data").(*item.ListData); ok {
 		categorySelected := item.Categories[0]
 		err := mainTemp.Execute(w, mainData{
-			Items:            data,
+			ListData:         data,
 			HideCart:         false,
 			Categories:       item.Categories,
 			Shops:            data.Shops(),
@@ -64,7 +64,7 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TableHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.Items); ok {
+	if data, ok := r.Context().Value("data").(*item.ListData); ok {
 		query := r.URL.Query()
 		shop := query.Get("s")
 		idStr := query.Get("id")
@@ -92,7 +92,7 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		err := tableTemp.Execute(w, mainData{
-			Items:      data,
+			ListData:   data,
 			Shop:       shop,
 			HideCart:   query.Get("h") != "0",
 			Categories: item.Categories,
@@ -197,7 +197,7 @@ type addData struct {
 }
 
 func AddHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.Items); ok {
+	if data, ok := r.Context().Value("data").(*item.ListData); ok {
 		target := ""
 		var itemName, itemUnit, category, shop string
 		var quantity float64 = 1
@@ -218,7 +218,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 				if err == nil {
 					if len(itemName) > 0 {
 						found := false
-						for _, e := range *data {
+						for _, e := range data.Items {
 							if e.Name == itemName && e.UnitSingular() == itemUnit {
 								e.SetQuantity(quantity)
 								found = true
@@ -282,11 +282,11 @@ func splitShop(shop string) []string {
 var listAllTemp = Templates.Lookup("listAll.html")
 
 func ListAllHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.Items); ok {
+	if data, ok := r.Context().Value("data").(*item.ListData); ok {
 		idStr := r.URL.Query().Get("del")
 		if idStr != "" {
 			id, idErr := strconv.Atoi(idStr)
-			if idErr == nil || id >= 0 || id < len(*data) {
+			if idErr == nil || id >= 0 || id < len(data.Items) {
 				data.DeleteItem(id)
 			}
 		}
@@ -300,7 +300,7 @@ func ListAllHandler(w http.ResponseWriter, r *http.Request) {
 var listAllRowTemp = Templates.Lookup("listAllRow.html")
 
 func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.Items); ok {
+	if data, ok := r.Context().Value("data").(*item.ListData); ok {
 		query := r.URL.Query()
 		idStr := query.Get("id")
 		if idStr != "" {
@@ -319,7 +319,7 @@ func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
 var editTemp = Templates.Lookup("edit.html")
 
 func EditHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.Items); ok {
+	if data, ok := r.Context().Value("data").(*item.ListData); ok {
 		var err error
 		var id int
 		var itemToEdit *item.Item
@@ -387,5 +387,14 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 		}
+	}
+}
+
+func NotesHandler(w http.ResponseWriter, r *http.Request) {
+	if data, ok := r.Context().Value("data").(*item.ListData); ok {
+		query := r.URL.Query()
+		notes := query.Get("n")
+		log.Println(notes)
+		data.Notes = strings.TrimSpace(notes)
 	}
 }
