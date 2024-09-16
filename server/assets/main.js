@@ -189,7 +189,6 @@ function notesInit() {
 
 function notesCheckLines() {
     let element = document.getElementById('notes');
-    let notes = element.value;
-    let lines = notes.split('\n').length;
+    let lines = element.value.split('\n').length;
     element.rows = lines;
 }
