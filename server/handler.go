@@ -282,15 +282,24 @@ func splitShop(shop string) []string {
 var listAllTemp = Templates.Lookup("listAll.html")
 
 func ListAllHandler(w http.ResponseWriter, r *http.Request) {
+
+	type liData struct {
+		Data    *item.ListData
+		ShowAll bool
+	}
+
 	if data, ok := r.Context().Value("data").(*item.ListData); ok {
-		idStr := r.URL.Query().Get("del")
+		query := r.URL.Query()
+		idStr := query.Get("del")
 		if idStr != "" {
 			id, idErr := strconv.Atoi(idStr)
 			if idErr == nil || id >= 0 || id < len(data.Items) {
 				data.DeleteItem(id)
 			}
 		}
-		err := listAllTemp.Execute(w, data)
+		showAll := query.Get("all") != "false"
+
+		err := listAllTemp.Execute(w, liData{Data: data, ShowAll: showAll})
 		if err != nil {
 			log.Println(err)
 		}
