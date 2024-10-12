@@ -13,13 +13,13 @@
     <tr>
       <td colspan="8" style="font-size:115%;font-weight:bold;">Shopping, {{len .Data.Items}} Artikel
           <a href="/add?t=all"><img class="list" style="top:0.2em" src="/assets/add.svg" title="Artikel hinzufügen"></a>
-          <a href="?all={{if .ShowAll}}false{{else}}true{{end}}"><img class="list" style="margin-left:0.5em;top:0.2em" src="/assets/dif.svg" title="Zeige Differenz"></a></td>
+          <a href="?all={{if .ShowAll}}false{{else}}true{{end}}"><img class="list" style="margin-left:0.5em;top:0.2em" src="/assets/less.svg" title="Nur Artikel, deren Menge kleiner ist als empfohlen."></a></td>
       <td><a href="/"><img class="list" src="/assets/back.svg" title="Einkaufsliste"></a></td>
     </tr>
     {{$lastCat := ""}}
     {{$showAll := .ShowAll}}
     {{range .Data.Items }}
-      {{if or $showAll (not (eq .QuantityRequired .Suggest)) }}
+      {{if or $showAll (lt .QuantityRequired .Suggest) }}
         {{if not (eq .Category $lastCat) }}
         <tr><th colspan="5">{{.Category}}</th></tr>
         {{end}}
