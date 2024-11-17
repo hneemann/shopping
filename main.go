@@ -47,7 +47,7 @@ func main() {
 		session.NewDataManager[item.ListData](
 			session.NewFileSystemFactory(*dataFolder),
 			persist{}),
-		24*time.Hour, 30*time.Minute)
+		8*24*time.Hour, 30*time.Minute)
 	defer sc.Close()
 
 	mux := http.NewServeMux()
