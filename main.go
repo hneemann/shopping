@@ -37,7 +37,7 @@ func (p persist) Save(f fileSys.FileSystem, items *item.ListData) error {
 
 func main() {
 	dataFolder := flag.String("folder", "data", "data folder")
-	port := flag.Int("port", 8080, "port")
+	port := flag.Int("port", 8090, "port")
 	cert := flag.String("cert", "cert.pem", "certificate")
 	key := flag.String("key", "cert.key", "certificate")
 	debug := flag.Bool("debug", false, "starts server in debug mode")
