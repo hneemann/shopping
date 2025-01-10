@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //go:embed templates/*
@@ -23,6 +24,22 @@ var AssetFS embed.FS
 const eps = 1e-6
 
 var Templates = template.Must(template.New("").Funcs(map[string]any{
+	"formatDate": func(t time.Time) string {
+		age := ageDays(t)
+		if age < 6 {
+			switch age {
+			case 0:
+				return "heute"
+			case 1:
+				return "gestern"
+			case 2:
+				return "vorgestern"
+			default:
+				return fmt.Sprintf("vor %d Tagen", age)
+			}
+		}
+		return t.Format("02.01.2006")
+	},
 	"niceToStr": func(v float64) string {
 		if math.Abs(math.Round(v)-v) < eps {
 			return fmt.Sprintf("%d", int(v))
@@ -33,6 +50,14 @@ var Templates = template.Must(template.New("").Funcs(map[string]any{
 		return fmt.Sprintf("%.2f", v)
 	},
 }).ParseFS(templateFS, "templates/*.html"))
+
+func ageDays(t time.Time) int {
+	return int(math.Round(toDay(time.Now()).Sub(toDay(t)).Hours() / 24))
+}
+
+func toDay(d time.Time) time.Time {
+	return time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, d.Location())
+}
 
 var mainTemp = Templates.Lookup("main.html")
 var tableTemp = Templates.Lookup("table.html")
@@ -384,12 +409,14 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 			Categories []item.Category
 			Shops      []string
 			Error      error
+			History    item.HistoryDescription
 		}{
 			Item:       itemToEdit,
 			Id:         id,
 			Categories: item.Categories,
 			Shops:      data.Shops(),
 			Error:      err,
+			History:    itemToEdit.HistoryDescription(),
 		}
 
 		err = editTemp.Execute(w, d)

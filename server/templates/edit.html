@@ -9,6 +9,10 @@
 </head>
 <body>
 
+{{define "history"}}
+{{if .Empty}}noch nie bzw. vor längerer Zeit{{else}}{{.Count}} mal, zuletzt {{formatDate .Last}}{{end}}
+{{end}}
+
 <form action="/edit/" method="post">
   <table class="mainTable">
      <tr>
@@ -53,6 +57,12 @@
          <td colspan="3" style="text-align:right">
            <a href="/listAll#q{{.Id}}"><button type="button">Abbrechen</button></a>
            <input type="submit" value="Ändern"/>
+         </td>
+     </tr>
+     <tr>
+         <td>Gekauft:</td>
+         <td colspan="2">
+             {{template "history" .History}}
          </td>
      </tr>
      {{if .Error}}<tr><td colspan="3" class="error">{{.Error}}</td></tr>{{end}}

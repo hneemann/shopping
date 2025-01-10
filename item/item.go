@@ -425,6 +425,25 @@ func (i *Item) Suggest() float64 {
 	return i.suggestedQuantityRequired
 }
 
+type HistoryDescription struct {
+	Count int
+	Last  time.Time
+}
+
+func (hd HistoryDescription) Empty() bool {
+	return hd.Count == 0
+}
+
+func (i *Item) HistoryDescription() HistoryDescription {
+	if i == nil || len(i.ShopHistory) == 0 {
+		return HistoryDescription{}
+	}
+	return HistoryDescription{
+		Count: len(i.ShopHistory),
+		Last:  i.ShopHistory[len(i.ShopHistory)-1].ShopTime,
+	}
+}
+
 func (i *Item) UnitSingular() string {
 	i.createUnits()
 	return i.unitSingular
