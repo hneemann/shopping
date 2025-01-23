@@ -18,12 +18,12 @@
     {{$hide := .HideCart}}
     {{range .ListData.Items }}
       {{- if and (.ShopMatches $shop) (gt .QuantityRequired 0.0) -}}
-        {{- if not (and $hide .IsInCar) -}}
+        {{- if not (and $hide .IsHidden) -}}
           {{- if not (eq .Category $lastCat) -}}
           <tr><th colspan="4">{{.Category}}</th></tr>
           {{- end}}
           <tr>
-            <td onclick="showSetQuantity({{.QuantityRequired}},{{.Id}});" {{if .IsInCar}}class="nameBasket"{{else}}class="name"{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
+            <td onclick="showSetQuantity({{.QuantityRequired}},{{.Id}});" {{if .IsInCar}}class="nameBasket"{{else}}{{if .IsNotAvailable}}class="nameNotAvail"{{else}}class="name"{{end}}{{end}}{{if .ShopIs $shop}} style="background: #a0ffa0;"{{end}}>{{.Name}}</td>
             <td class="number" onclick="showSetQuantity({{.QuantityRequired}},{{.Id}});">{{niceToStr .QuantityRequired}}</td>
             <td>{{.ShortUnit}}</td>
             <td class="car"><img id="car_{{.Id}}" class="list" {{if .IsInCar}}src="/assets/eCar.svg"{{else}}src="/assets/sCar.svg"{{end}} onclick="updateItem({{.Id}},'car');"></td>

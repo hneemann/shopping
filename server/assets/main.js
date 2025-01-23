@@ -46,6 +46,10 @@ function setQuantityDelete() {
     updateTable("id=" + quantityModifyId + "&mode=del")
 }
 
+function toggleAvail() {
+    updateTable("id=" + quantityModifyId + "&mode=na")
+}
+
 function addItem() {
     let id = document.getElementById('addItemItem').value;
     let q = niceFromString(document.getElementById('addItemQuantity').innerHTML);

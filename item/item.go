@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	historyDays           = 90
+	historyDays           = 180
 	daysShoppingHasToLast = 4
 )
 
@@ -128,7 +128,7 @@ func (ld *ListData) Total() Total {
 	volume := 0.0
 	for _, item := range ld.Items {
 		q := item.QuantityRequired
-		if q > 0 {
+		if q > 0 && !item.IsNotAvailable {
 			weight += float64(item.Weight) * q
 			volume += float64(item.Volume) * q
 		}
@@ -149,7 +149,22 @@ func (ld *ListData) ToggleInCar(id int) {
 	if item := ld.ItemById(id); item != nil {
 		if item.QuantityRequired > 0 {
 			item.IsInCar = !item.IsInCar
+			if item.IsInCar {
+				item.IsNotAvailable = false
+			}
 			log.Println("in car:", item.Name, item.IsInCar)
+		}
+	}
+}
+
+func (ld *ListData) ToggleAvailable(id int) {
+	if item := ld.ItemById(id); item != nil {
+		if item.QuantityRequired > 0 {
+			item.IsNotAvailable = !item.IsNotAvailable
+			if item.IsNotAvailable {
+				item.IsInCar = false
+			}
+			log.Println("not available:", item.Name, item.IsInCar)
 		}
 	}
 }
@@ -159,6 +174,7 @@ func (ld *ListData) DeleteFromList(id int) {
 		log.Println("deleted", item.Name)
 		item.QuantityRequired = 0
 		item.IsInCar = false
+		item.IsNotAvailable = false
 	}
 }
 
@@ -167,6 +183,7 @@ func (ld *ListData) Paid() {
 	ti := time.Now()
 	isItemInCar := false
 	for _, item := range ld.Items {
+		item.IsNotAvailable = false
 		if item.QuantityRequired > 0 {
 			if item.IsInCar {
 				item.ShopHistory = append(item.ShopHistory, HistoryEntry{
@@ -208,12 +225,13 @@ func (ld *ListData) ModQuantity(id int, n float64, useUnitIncrement bool) {
 			item.QuantityRequired = 0
 		}
 		item.IsInCar = false
+		item.IsNotAvailable = false
 	}
 }
 
 func (ld *ListData) SomethingHidden() bool {
 	for _, item := range ld.Items {
-		if item.QuantityRequired > 0 && item.IsInCar {
+		if item.QuantityRequired > 0 && (item.IsInCar || item.IsNotAvailable) {
 			return true
 		}
 	}
@@ -304,7 +322,8 @@ type Item struct {
 	uniqueName                  string
 	Shops                       []string
 	QuantityRequired            float64
-	IsInCar                     bool   `json:"Basket"`
+	IsInCar                     bool `json:"Basket"`
+	IsNotAvailable              bool
 	UnitDef                     string `json:"Unit"`
 	unitCreated                 bool
 	unitSingular                string
@@ -345,6 +364,7 @@ func (i *Item) SetQuantity(quantity float64) {
 	log.Println("Set quantity", i.Name, quantity)
 	i.QuantityRequired = quantity
 	i.IsInCar = false
+	i.IsNotAvailable = false
 }
 
 func (i *Item) Less(other *Item, cat func(Category) int) bool {
@@ -390,6 +410,10 @@ func (i *Item) ShopsStr() string {
 		str += s
 	}
 	return str
+}
+
+func (i *Item) IsHidden() bool {
+	return i.IsInCar || i.IsNotAvailable
 }
 
 func (i *Item) Suggest() float64 {

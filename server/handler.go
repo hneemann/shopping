@@ -98,6 +98,8 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 			mode := query.Get("mode")
 			if data.IdValid(id) {
 				switch mode {
+				case "na":
+					(*data).ToggleAvailable(id)
 				case "car":
 					(*data).ToggleInCar(id)
 				case "del":
