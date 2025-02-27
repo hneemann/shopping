@@ -98,14 +98,10 @@
     }
 }
 
-textarea.notes {
+input.newTemp {
     font-size: 100%;
     font-family: Arial, sans-serif;
-    width: 97%;
-    resize: none;
-    white-space: pre;
-    overflow-wrap: normal;
-    overflow-x: scroll;
+    width: 100%;
 }
 
 div.buttonRow {
@@ -139,6 +135,13 @@ img.list {
 
 img.normal {
     width: 1.75em;
+}
+
+img.small {
+    width: 1.5em;
+    position: relative;
+    top: 0.1em;
+    left:0.1em;
 }
 
 img.close {

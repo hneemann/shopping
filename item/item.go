@@ -47,9 +47,15 @@ type HistoryEntry struct {
 	Quantity float64
 }
 
+type TempItem struct {
+	Name    string
+	IsInCar bool
+}
+
 type ListData struct {
-	Items []*Item
-	Notes string
+	Items     []*Item
+	Notes     string `json:"-"`
+	TempItems []TempItem
 }
 
 type Total struct {
@@ -181,7 +187,6 @@ func (ld *ListData) DeleteFromList(id int) {
 func (ld *ListData) Paid() {
 	log.Println("Paid")
 	ti := time.Now()
-	isItemInCar := false
 	for _, item := range ld.Items {
 		item.IsNotAvailable = false
 		if item.QuantityRequired > 0 {
@@ -193,13 +198,13 @@ func (ld *ListData) Paid() {
 				item.QuantityRequired = 0
 				item.IsInCar = false
 				item.suggestedQuantityCalculated = false
-			} else {
-				isItemInCar = true
 			}
 		}
 	}
-	if !isItemInCar {
-		ld.Notes = ""
+	for _, item := range ld.TempItems {
+		if item.IsInCar {
+			ld.TempItems = append(ld.TempItems[:0], ld.TempItems[1:]...)
+		}
 	}
 }
 
@@ -232,6 +237,11 @@ func (ld *ListData) ModQuantity(id int, n float64, useUnitIncrement bool) {
 func (ld *ListData) SomethingHidden() bool {
 	for _, item := range ld.Items {
 		if item.QuantityRequired > 0 && (item.IsInCar || item.IsNotAvailable) {
+			return true
+		}
+	}
+	for _, item := range ld.TempItems {
+		if item.IsInCar {
 			return true
 		}
 	}
@@ -313,6 +323,19 @@ func (ld *ListData) removeOldHistory() {
 		if removed > 0 {
 			log.Println("removed", removed, "old entries from", item.Name)
 		}
+	}
+}
+
+func (ld *ListData) AddTemp(name string) {
+	name = strings.TrimSpace(name)
+	if len(name) > 0 {
+		ld.TempItems = append(ld.TempItems, TempItem{Name: name, IsInCar: false})
+	}
+}
+
+func (ld *ListData) ToggleTemp(n int) {
+	if n >= 0 && n < len(ld.TempItems) {
+		ld.TempItems[n].IsInCar = !ld.TempItems[n].IsInCar
 	}
 }
 

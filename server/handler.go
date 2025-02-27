@@ -115,6 +115,13 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 			switch action {
 			case "paid":
 				data.Paid()
+			case "at":
+				(*data).AddTemp(query.Get("n"))
+			case "tt":
+				n, err := strconv.Atoi(query.Get("n"))
+				if err == nil {
+					(*data).ToggleTemp(n)
+				}
 			}
 		}
 
@@ -425,14 +432,5 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 		}
-	}
-}
-
-func NotesHandler(w http.ResponseWriter, r *http.Request) {
-	if data, ok := r.Context().Value("data").(*item.ListData); ok {
-		query := r.URL.Query()
-		notes := query.Get("n")
-		log.Println(notes)
-		data.Notes = strings.TrimSpace(notes)
 	}
 }

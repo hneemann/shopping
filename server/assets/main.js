@@ -176,23 +176,15 @@ function updateTable(query) {
         })
 }
 
-function notesChanged() {
-    let notes = document.getElementById('notes').value;
-    fetch("/notes/?n=" + encodeURIComponent(notes))
-        .then(function (response) {
-            if (response.status !== 200) {
-                window.location.reload();
-            }
-        })
+function addTemp() {
+    let temp = document.getElementById('addTemp').value;
+    if (temp.length > 0) {
+        updateTable("a=at&n=" + temp)
+    }
 }
 
-function notesInit() {
-    let element = document.getElementById('notes');
-    element.addEventListener('input', notesCheckLines);
+function toggleTemp(n) {
+    updateTable("a=tt&n=" + n)
 }
 
-function notesCheckLines() {
-    let element = document.getElementById('notes');
-    let lines = element.value.split('\n').length;
-    element.rows = lines;
-}
+

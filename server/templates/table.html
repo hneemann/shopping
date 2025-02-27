@@ -33,15 +33,27 @@
       {{- end -}}
     {{end}}
 
+    {{$isHead := false}}
+    {{range $i,$n := .ListData.TempItems}}
+      {{- if not (and $hide $n.IsInCar) -}}
+        {{if not $isHead}}<tr><th colspan="4">Zusätzlich</th></tr>{{$isHead = true}}{{end}}
+        <tr>
+          <td colspan="3" {{if $n.IsInCar}}class="nameBasket"{{else}}class="name"{{end}}>{{$n.Name}}</td>
+          <td class="car"><img class="list" {{if $n.IsInCar}}src="/assets/eCar.svg"{{else}}src="/assets/sCar.svg"{{end}} onclick="toggleTemp({{$i}});"></td>
+        </tr>
+      {{end}}
+    {{end}}
+
     <tr>
     {{$total := .ListData.Total}}
     <td style="padding-top: 1em; padding-bottom: 1em;" colspan="4">Gewicht: {{printf "%1.1f" $total.Weight}} kg / Volumen: {{printf "%1.1f" $total.Volume}} l</td>
     </tr>
 
     <tr>
-        <td colspan="4" >
-            <textarea id="notes" class="notes" rows="{{.ListData.NotesLines}}" placeholder="Notizen" autocomplete="off" onchange="notesChanged();">{{.ListData.Notes}}</textarea>
+        <td colspan="3" >
+            <input id="addTemp" class="newTemp" type="text" placeholder="schneller Eintrag" autocomplete="off"></input>
         </td>
+        <td><img class="small" onclick="addTemp();" src="/assets/add.svg" title="Artikel hinzufügen"></td>
     </tr>
 
     {{if .ListData.SomethingHidden}}

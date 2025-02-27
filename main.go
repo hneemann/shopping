@@ -61,7 +61,6 @@ func main() {
 	mux.HandleFunc("/listAll", sc.CheckSessionFunc(server.ListAllHandler))
 	mux.HandleFunc("/listAllMod/", sc.CheckSessionRest(http.HandlerFunc(server.ListAllModHandler)))
 	mux.HandleFunc("/edit/", sc.CheckSessionFunc(server.EditHandler))
-	mux.HandleFunc("/notes/", sc.CheckSessionRest(http.HandlerFunc(server.NotesHandler)))
 
 	assetServer := http.FileServer(http.FS(server.AssetFS))
 	if *debug {
