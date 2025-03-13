@@ -308,6 +308,17 @@ func EncodeTarget(target string) string {
 	return base64.URLEncoding.EncodeToString([]byte(target))
 }
 
+func CreateSecureCookie(name, value string) *http.Cookie {
+	return &http.Cookie{
+		Name:     name,
+		Value:    value,
+		HttpOnly: true,                    // XSS protection, no access from JavaScript
+		Secure:   true,                    // only send cookie over HTTPS
+		SameSite: http.SameSiteStrictMode, // protect from CSRF
+		Path:     "/",                     // cookie is valid for all paths
+	}
+}
+
 // LoginHandler is a handler that does the login.
 // The given template is used to render the login page.
 // It needs to contain a form with the fields username and password.
@@ -328,7 +339,7 @@ func (s *Cache[S]) LoginHandler(loginTemp *template.Template) http.HandlerFunc {
 
 			var id string
 			if id, err = s.CreateSessionToken(user, pass); err == nil {
-				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
+				http.SetCookie(w, CreateSecureCookie("id", id))
 				target := DecodeTarget(encodedTarget)
 				log.Println("redirect to", target)
 				http.Redirect(w, r, target, http.StatusFound)
@@ -389,7 +400,7 @@ func (s *Cache[S]) RegisterHandler(registerTemp *template.Template) http.Handler
 
 			var id string
 			if id, err = s.registerUser(user, pass, pass2); err == nil {
-				http.SetCookie(w, &http.Cookie{Value: id, Name: "id"})
+				http.SetCookie(w, CreateSecureCookie("id", id))
 				target := DecodeTarget(encodedTarget)
 				log.Println("redirect to", target)
 				http.Redirect(w, r, target, http.StatusFound)
