@@ -395,12 +395,24 @@ func (i *Item) Less(other *Item, cat func(Category) int) bool {
 		if i.Name == other.Name {
 			return i.UnitSingular() < other.UnitSingular()
 		}
-		return strings.ToLower(i.Name) < strings.ToLower(other.Name)
+		return germanLower(i.Name) < germanLower(other.Name)
 	}
 	if cat != nil {
 		return cat(i.Category) < cat(other.Category)
 	}
-	return strings.ToLower(string(i.Category)) < strings.ToLower(string(other.Category))
+	return germanLower(string(i.Category)) < germanLower(string(other.Category))
+}
+
+func germanLower(s string) string {
+	s = strings.ToLower(s)
+	s = strings.ReplaceAll(s, "ä", "a")
+	s = strings.ReplaceAll(s, "ö", "o")
+	s = strings.ReplaceAll(s, "ü", "u")
+	s = strings.ReplaceAll(s, "ß", "s")
+	s = strings.ReplaceAll(s, "Ä", "a")
+	s = strings.ReplaceAll(s, "Ö", "o")
+	s = strings.ReplaceAll(s, "Ü", "u")
+	return s
 }
 
 func (i *Item) ShopMatches(shop string) bool {
