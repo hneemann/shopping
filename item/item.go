@@ -24,7 +24,7 @@ type CategoryList []Category
 
 var Categories = CategoryList{
 	"Obst/Gemüse", "Kühlregal", "Kuchen", "Brot", "Tee/Kaffee", "Backzutaten", "Cerealien",
-	"Konserven", "Fertiggerichte", "Hygiene", "Getränke", "Tiefkühl", "Süßes", "Anderes",
+	"Konserven", "Fertiggerichte", "Hygiene", "Katzen", "Getränke", "Tiefkühl", "Süßes", "Anderes",
 }
 
 var rewe = MapOrder(Categories...)

@@ -63,9 +63,9 @@ func TestItems_removeOldHistory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var items Items = []*Item{&tt.item}
-			items.removeOldHistory()
-			assert.EqualValues(t, tt.size, len(items[0].ShopHistory))
+			var listData = ListData{Items: []*Item{&tt.item}}
+			listData.removeOldHistory()
+			assert.EqualValues(t, tt.size, len(listData.Items[0].ShopHistory))
 		})
 	}
 }

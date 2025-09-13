@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/hneemann/session"
+	"github.com/hneemann/session/fileSys"
 	"github.com/hneemann/shopping/item"
 	"github.com/hneemann/shopping/server"
-	"github.com/hneemann/shopping/session"
-	"github.com/hneemann/shopping/session/fileSys"
 	"log"
 	"net/http"
 	"os"
@@ -24,6 +24,10 @@ func (p persist) Load(f fileSys.FileSystem) (*item.ListData, error) {
 	}
 	defer fileSys.CloseLog(r)
 	return item.Load(r)
+}
+
+func (p persist) Init(_ fileSys.FileSystem, _ *item.ListData) error {
+	return nil
 }
 
 func (p persist) Save(f fileSys.FileSystem, items *item.ListData) error {
@@ -44,7 +48,7 @@ func main() {
 	flag.Parse()
 
 	sc := session.NewSessionCache[item.ListData](
-		session.NewDataManager[item.ListData](
+		session.NewFileManager[item.ListData](
 			session.NewFileSystemFactory(*dataFolder),
 			persist{}),
 		8*24*time.Hour, 30*time.Minute)
