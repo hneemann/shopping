@@ -30,6 +30,12 @@
         {{$lastCat = .Category}}
       {{end}}
     {{end}}
+    <tr>
+      <td colspan="8">
+          <input id="categoriesInput" style="width:100%" type="text" value="{{.Data.CategoriesString}}">
+      </td>
+      <td><img class="small" onclick="saveCategories();" src="/assets/change.svg" title="Speichern"></td>
+    </tr>
 </table>
 </body>
 </html>

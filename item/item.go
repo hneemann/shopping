@@ -22,12 +22,7 @@ type Category string
 
 type CategoryList []Category
 
-var Categories = CategoryList{
-	"Obst/Gemüse", "Kühlregal", "Kuchen", "Brot", "Tee/Kaffee", "Backzutaten", "Cerealien",
-	"Konserven", "Fertiggerichte", "Hygiene", "Katzen", "Getränke", "Tiefkühl", "Süßes", "Anderes",
-}
-
-var rewe = MapOrder(Categories...)
+var defaultCategories = "Obst/Gemüse; Kühlregal; Kuchen; Brot; Tee/Kaffee; Backzutaten; Cerealien; Konserven; Fertiggerichte; Hygiene; Getränke; Tiefkühl; Süßes; Anderes"
 
 func (cl CategoryList) Index(category Category) int {
 	for i, c := range cl {
@@ -53,22 +48,17 @@ type TempItem struct {
 }
 
 type ListData struct {
-	Items     []*Item
-	Notes     string `json:"-"`
-	TempItems []TempItem
+	Items            []*Item
+	CategoriesString string
+	TempItems        []TempItem
+
+	orderFunc  func(Category) int
+	categories []Category
 }
 
 type Total struct {
 	Weight float64
 	Volume float64
-}
-
-func (ld *ListData) NotesLines() int {
-	if len(ld.Notes) > 0 {
-		lines := strings.Split(ld.Notes, "\n")
-		return len(lines)
-	}
-	return 1
 }
 
 func (ld *ListData) AddItem(item *Item) {
@@ -81,7 +71,7 @@ func (ld *ListData) AddItem(item *Item) {
 	item.Id = id + 1
 	ld.Items = append(ld.Items, item)
 	ld.createUniqueNames()
-	ld.Order(rewe)
+	ld.Order()
 }
 
 func (ld *ListData) DeleteItem(id int) {
@@ -95,7 +85,7 @@ func (ld *ListData) DeleteItem(id int) {
 		log.Println("finally delete item", ld.Items[index].Name)
 		ld.Items = append(ld.Items[:index], ld.Items[index+1:]...)
 		ld.createUniqueNames()
-		ld.Order(rewe)
+		ld.Order()
 	}
 }
 
@@ -126,7 +116,7 @@ func (ld *ListData) Replace(id int, edit *Item) {
 		}
 	}
 	ld.createUniqueNames()
-	ld.Order(rewe)
+	ld.Order()
 }
 
 func (ld *ListData) Total() Total {
@@ -248,7 +238,7 @@ func (ld *ListData) SomethingHidden() bool {
 	return false
 }
 
-func MapOrder(str ...Category) func(Category) int {
+func MapOrder(str []Category) func(Category) int {
 	m := make(map[Category]int)
 	for i, s := range str {
 		m[s] = i
@@ -261,9 +251,37 @@ func MapOrder(str ...Category) func(Category) int {
 	}
 }
 
-func (ld *ListData) Order(c func(Category) int) {
+func (ld *ListData) initCategories() {
+	if ld.orderFunc == nil {
+		l := strings.Split(ld.CategoriesString, ";")
+		if len(l) == 1 && strings.TrimSpace(l[0]) == "" {
+			ld.CategoriesString = defaultCategories
+			l = strings.Split(ld.CategoriesString, ";")
+		}
+		ld.categories = make([]Category, len(l))
+		for i, c := range l {
+			ld.categories[i] = Category(strings.TrimSpace(c))
+		}
+		ld.orderFunc = MapOrder(ld.categories)
+	}
+}
+
+func (ld *ListData) SetCategoryString(cat string) {
+	ld.CategoriesString = cat
+	ld.orderFunc = nil
+	ld.initCategories()
+	ld.Order()
+}
+
+func (ld *ListData) Categories() []Category {
+	ld.initCategories()
+	return ld.categories
+}
+
+func (ld *ListData) Order() {
+	ld.initCategories()
 	sort.Slice(ld.Items, func(i, j int) bool {
-		return ld.Items[i].Less(ld.Items[j], c)
+		return ld.Items[i].Less(ld.Items[j], ld.orderFunc)
 	})
 }
 

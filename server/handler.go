@@ -74,11 +74,11 @@ type mainData struct {
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.ListData); ok {
-		categorySelected := item.Categories[0]
+		categorySelected := data.Categories()[0]
 		err := mainTemp.Execute(w, mainData{
 			ListData:         data,
 			HideCart:         false,
-			Categories:       item.Categories,
+			Categories:       data.Categories(),
 			Shops:            data.Shops(),
 			CategorySelected: categorySelected,
 		})
@@ -129,7 +129,7 @@ func TableHandler(w http.ResponseWriter, r *http.Request) {
 			ListData:   data,
 			Shop:       shop,
 			HideCart:   query.Get("h") != "0",
-			Categories: item.Categories,
+			Categories: data.Categories(),
 			Shops:      data.Shops(),
 		})
 		if err != nil {
@@ -278,7 +278,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			category = r.URL.Query().Get("c")
 			if category == "" {
-				category = string(item.Categories[0])
+				category = string(data.Categories()[0])
 			}
 			target = r.URL.Query().Get("t")
 		}
@@ -290,7 +290,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 			Weight:     weightStr,
 			Volume:     volumeStr,
 			QHidden:    false,
-			Categories: item.Categories,
+			Categories: data.Categories(),
 			Shops:      data.Shops(),
 			Error:      err,
 			Target:     target,
@@ -354,6 +354,11 @@ func ListAllModHandler(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					log.Println(err)
 				}
+			}
+		} else {
+			cat := query.Get("cat")
+			if len(cat) > 3 {
+				data.SetCategoryString(cat)
 			}
 		}
 	}
@@ -422,7 +427,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 		}{
 			Item:       itemToEdit,
 			Id:         id,
-			Categories: item.Categories,
+			Categories: data.Categories(),
 			Shops:      data.Shops(),
 			Error:      err,
 			History:    itemToEdit.HistoryDescription(),

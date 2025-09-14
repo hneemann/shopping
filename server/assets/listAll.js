@@ -12,3 +12,11 @@ function modify(id, n) {
             q.innerHTML = html;
         })
 }
+
+function saveCategories() {
+    let cat = document.getElementById('categoriesInput').value;
+    fetch("/listAllMod/?cat=" + encodeURIComponent(cat))
+        .then(function (response) {
+            window.location.reload();
+        })
+}
