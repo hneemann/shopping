@@ -51,9 +51,17 @@ type ListData struct {
 	Items            []*Item
 	CategoriesString string
 	TempItems        []TempItem
+	LastAddedToCar   time.Time
 
-	orderFunc  func(Category) int
-	categories []Category
+	orderFunc          func(Category) int
+	categories         []Category
+	lastCheckedTimeout time.Time
+}
+
+func sameDay(a, b time.Time) bool {
+	ay, am, ad := a.Date()
+	by, bm, bd := b.Date()
+	return ay == by && am == bm && ad == bd
 }
 
 type Total struct {
@@ -147,6 +155,7 @@ func (ld *ListData) ToggleInCar(id int) {
 			item.IsInCar = !item.IsInCar
 			if item.IsInCar {
 				item.IsNotAvailable = false
+				ld.LastAddedToCar = time.Now()
 			}
 			log.Println("in car:", item.Name, item.IsInCar)
 		}
@@ -174,15 +183,47 @@ func (ld *ListData) DeleteFromList(id int) {
 	}
 }
 
+func (ld *ListData) CheckPaidTimeout() {
+	now := time.Now()
+	if sameDay(ld.lastCheckedTimeout, now) {
+		return
+	}
+	ld.lastCheckedTimeout = now
+
+	if sameDay(ld.LastAddedToCar, now) {
+		return
+	}
+
+	isSomethingInCar := false
+	for _, item := range ld.Items {
+		if item.QuantityRequired > 0 && item.IsInCar {
+			isSomethingInCar = true
+			break
+		}
+	}
+	if !isSomethingInCar {
+		for _, item := range ld.TempItems {
+			if item.IsInCar {
+				isSomethingInCar = true
+				break
+			}
+		}
+	}
+
+	if isSomethingInCar {
+		log.Println("paid-timeout detected")
+		ld.Paid()
+	}
+}
+
 func (ld *ListData) Paid() {
 	log.Println("Paid")
-	ti := time.Now()
 	for _, item := range ld.Items {
 		item.IsNotAvailable = false
 		if item.QuantityRequired > 0 {
 			if item.IsInCar {
 				item.ShopHistory = append(item.ShopHistory, HistoryEntry{
-					ShopTime: ti,
+					ShopTime: ld.LastAddedToCar,
 					Quantity: item.QuantityRequired,
 				})
 				item.QuantityRequired = 0

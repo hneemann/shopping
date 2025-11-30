@@ -74,6 +74,7 @@ type mainData struct {
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.ListData); ok {
+		data.CheckPaidTimeout()
 		categorySelected := data.Categories()[0]
 		err := mainTemp.Execute(w, mainData{
 			ListData:         data,
@@ -172,7 +173,7 @@ var simpleParser = funcGen.New[float64]().
 	AddSimpleOp("*", true, func(a, b float64) (float64, error) { return a * b, nil }).
 	AddSimpleOp("/", false, func(a, b float64) (float64, error) { return a / b, nil }).
 	AddSimpleOp("^", false, func(a, b float64) (float64, error) { return math.Pow(a, b), nil }).
-	AddUnary("-", func(a float64) (float64, error) { return -a, nil }).
+	AddUnaryFunc("-", func(a float64) (float64, error) { return -a, nil }).
 	AddSimpleFunction("sin", math.Sin).
 	AddSimpleFunction("cos", math.Cos).
 	AddSimpleFunction("tan", math.Tan).
