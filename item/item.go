@@ -53,9 +53,8 @@ type ListData struct {
 	TempItems        []TempItem
 	LastAddedToCar   time.Time
 
-	orderFunc          func(Category) int
-	categories         []Category
-	lastCheckedTimeout time.Time
+	orderFunc  func(Category) int
+	categories []Category
 }
 
 func sameDay(a, b time.Time) bool {
@@ -183,14 +182,8 @@ func (ld *ListData) DeleteFromList(id int) {
 	}
 }
 
-func (ld *ListData) CheckPaidTimeout() {
-	now := time.Now()
-	if sameDay(ld.lastCheckedTimeout, now) {
-		return
-	}
-	ld.lastCheckedTimeout = now
-
-	if sameDay(ld.LastAddedToCar, now) {
+func (ld *ListData) checkPaidTimeout() {
+	if sameDay(ld.LastAddedToCar, time.Now()) {
 		return
 	}
 
@@ -681,6 +674,7 @@ func Load(r io.Reader) (*ListData, error) {
 
 	items.removeOldHistory()
 	items.createUniqueNames()
+	items.checkPaidTimeout()
 
 	return &items, nil
 }

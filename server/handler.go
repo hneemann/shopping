@@ -74,7 +74,6 @@ type mainData struct {
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	if data, ok := r.Context().Value("data").(*item.ListData); ok {
-		data.CheckPaidTimeout()
 		categorySelected := data.Categories()[0]
 		err := mainTemp.Execute(w, mainData{
 			ListData:         data,
